@@ -25,7 +25,6 @@
 	<classpathentry kind="lib" path="lib/org.apache.servicemix.bundles.jline-0.9.94_1.jar"/>
 	<classpathentry kind="lib" path="lib/parboiled-core-1.1.6.jar"/>
 	<classpathentry kind="lib" path="lib/parboiled-scala_2.10-1.1.6.jar"/>
-	<classpathentry kind="lib" path="lib/README.txt"/>
 	<classpathentry kind="lib" path="lib/scala-library-2.10.4.jar"/>
 	<classpathentry kind="lib" path="lib/server-api-2.1.7.jar"/>
 	<classpathentry kind="output" path="bin"/>
