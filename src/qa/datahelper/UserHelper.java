@@ -27,20 +27,22 @@ public  class UserHelper {
 
 	/**
 	  * add the follower of the user
+	 * @param string 
 	  * @param userId: the twitter_id of the user
 	  * @param followerId: the twitter_id of the follower of the user
 	  */
-	public void addFollower(long userId, long followerId) {
+	public void addFollower(long userId, long followerId, String string) {
 		// TODO Auto-generated method stub
 		
 	}
 	
 	/**
 	  * add the following of the user
+	 * @param string 
 	  * @param userId: the twitter_id of the user
 	  * @param followeingId: the twitter_id of the following of the user
 	  */
-	public void addFollowing(long userId, long followingId) {
+	public void addFollowing(long userId, long followingId, String string) {
 		// TODO Auto-generated method stub
 		
 	}
