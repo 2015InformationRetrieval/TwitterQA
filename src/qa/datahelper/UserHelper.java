@@ -5,7 +5,7 @@ import twitter4j.User;
 public  class UserHelper {
 	
 	/**
-	  * find user whether the user exist in the database
+	  * find user whether the user exist in the main user list
 	  * @param id: the twitter_id of the user
 	  * @return if there is the user exist in the database, return true.  Else return false 
 	  */
