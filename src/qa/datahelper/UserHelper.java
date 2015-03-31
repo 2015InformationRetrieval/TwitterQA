@@ -30,8 +30,6 @@ public  class UserHelper {
 	// (1) User(Property:id)  (2) Index (Property: token)
 	
 	 ExecutionEngine engine;	
-	 UniqueFactory<Node> factory;
-	 Index<Node> indexa;
 	 
 	 private static final String DB_PATH = "target/java-query-db";
 	 GraphDatabaseService db = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
