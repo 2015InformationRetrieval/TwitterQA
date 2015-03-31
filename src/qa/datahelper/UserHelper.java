@@ -61,7 +61,7 @@ public  class UserHelper {
 				 user.addLabel(User);
 				 user.setProperty("ID", userId);
 				 user.setProperty("name", Name);
-				 
+				 System.out.println("addUser is done");
 				 tx.success();
 				 
 			 }
@@ -154,13 +154,14 @@ public  class UserHelper {
 					 
 					 Relationship relationship = user_node.createRelationshipTo(index_node, RelTypes.Indexed);
 					 
-					 match = (String)user_node.getProperty("ID") + ": " + (String)index_node.getProperty("token");
+					 //match = (String)user_node.getProperty("ID") + ": " + (String)index_node.getProperty("token");
+					 System.out.println("addIndex is done");
 					 
 					 tx.success();
 					 
 				 }
 				 
-				 System.out.println(match);
+				 //System.out.println(match);
 				
 				
 			} else { // create a node with property token: token
@@ -176,13 +177,14 @@ public  class UserHelper {
 					 
 					 Relationship relationship = user_node.createRelationshipTo(index_node, RelTypes.Indexed);
 					 
-					 match = (String)user_node.getProperty("ID") + ": " + (String)index_node.getProperty("token");
+					 //match = (String)user_node.getProperty("ID") + ": " + (String)index_node.getProperty("token");
+					 System.out.println("addIndex is done");
 					 
 					 tx.success();
 					 
 				 }
 				 
-				 System.out.println(match);
+				 //System.out.println(match);
 								
 			}		
 			
