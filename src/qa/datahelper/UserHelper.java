@@ -1,5 +1,15 @@
 package qa.datahelper;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import org.neo4j.cypher.javacompat.ExecutionEngine;
+import org.neo4j.cypher.javacompat.ExecutionResult;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Transaction;
+
 import twitter4j.User;
 
 public  class UserHelper {
@@ -44,5 +54,70 @@ public  class UserHelper {
 		// TODO Auto-generated method stub
 		
 	}
-
+	
+	/**
+	  * find whether the query word is a index or not
+	  * @param word: the query word 
+	  * @param graphDataService: the address of database
+	  */
+	public Node findIndex(String word, GraphDatabaseService graphDataService){
+	
+		Node node = null;
+		ExecutionEngine engine = new ExecutionEngine(graphDataService);
+		ExecutionResult result;
+		
+		try(Transaction transction=graphDataService.beginTx()){
+			//suppose it's called value
+			result=engine.execute("MATCH (a) Where a.value='"+ word + "' RETURN  a");
+			node=(Node) result.columnAs("a");
+		}
+		 return node;	
+	}
+	
+	/**
+	  * find the followers of the questioner who has the index terms
+	  * @param node: the index node
+	  * @param Uid: the questioner's id
+	  * @param graphDataService: the address of database
+	  */
+	public Set<Node> findAnswer(String index,Long Uid,GraphDatabaseService graphDataService){
+		
+		 Set<Node> users = new HashSet<>();
+		 ExecutionEngine engine = new ExecutionEngine(graphDataService);
+		 ExecutionResult result;
+		 
+		 try(Transaction transction=graphDataService.beginTx()){
+			 //suppose the relationship called 'BELONG_TO' and `FOLLOWING`, 
+			 result=engine.execute("MATCH (a)-[:`BELONG_TO`]->(b)-[:`FOLLOWING`]->(c) where a.value='"+index+"' and c.id='"+Uid+"' RETURN b");
+			 for(Map<String,Object> map : result){
+				 Node temp=(Node) map.get("b");
+				 users.add(temp);	 
+			 }     
+		 }
+		 return users;
+	}
+	
+	/**
+	  * find the followers of the user
+	  * @param id: the id of the user
+	  * @param graphDataService: the address of database
+	  */
+	public Set<Node> findFollowed(Long id,GraphDatabaseService graphDataService){
+		
+		Set<Node> users = new HashSet<>();
+		ExecutionEngine engine = new ExecutionEngine(graphDataService);
+		ExecutionResult result;
+		
+		try(Transaction transction=graphDataService.beginTx()){
+			//suppose the relationship named 'FOLLOWED', and the property called id
+			result=engine.execute("MATCH (a)-[:`FOLLOWED`]->(b) where b.id='"+id+"' RETURN a");
+			 for(Map<String,Object> map : result){
+				 Node temp=(Node) map.get("a");
+				 users.add(temp);	 
+			 }
+		}	
+		return users;
+	}
+	
+	
 }
