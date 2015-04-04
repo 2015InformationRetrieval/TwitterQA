@@ -14,7 +14,7 @@ import twitter4j.StatusUpdate;
 
 public class StreamListener implements StatusListener{
 	
-	String Neo4j_Path="ir";
+	String Neo4j_Path="neo4j-community-2.2.0/ir";
 	private UserService userService = new UserService();
 	GraphDatabaseService graphDataService=new GraphDatabaseFactory().newEmbeddedDatabase(Neo4j_Path);
 	@Override
