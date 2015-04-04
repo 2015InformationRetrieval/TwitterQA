@@ -54,7 +54,7 @@ public class TextTokenizer {
         if (listIterator.hasNext()) {
         	return listIterator.next();
         }
-        
+         
 		return null;
 	}
 	

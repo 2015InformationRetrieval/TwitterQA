@@ -95,7 +95,7 @@ public class UserService {
 		} catch (TwitterException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return null;
+			return null;  
 		}
 		return name;
 	}
