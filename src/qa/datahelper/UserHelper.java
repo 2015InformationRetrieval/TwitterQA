@@ -31,7 +31,7 @@ public  class UserHelper {
 	
 	 ExecutionEngine engine;	
 	 
-	 private static final String DB_PATH = "neo4j-community-2.2.0/ir";
+	 private static final String DB_PATH = "ir";
 	 GraphDatabaseService db = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
 	 
 	 // two labels in neo4j, Index and User
