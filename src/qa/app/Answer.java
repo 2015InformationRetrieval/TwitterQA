@@ -44,7 +44,15 @@ public class Answer {
 	public static void reply(Status status){ 
 		 init();
 		 String question = status.getText().replaceAll(Parameter.USER_NAME, "");
-		 StatusUpdate statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName()+ "For your question: " + question + getAnswerer(question.toLowerCase(),status.getUser().getId()) + " can answer your question");
+		 String answer = getAnswerer(question.toLowerCase(),status.getUser().getId());
+		 StatusUpdate statusUpdate = null;
+		 if(answer.length() == 0){
+			 statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName() + "No one can answer your question in your friend circle..");
+		 }else{
+			 statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName()+ "For your question: " + question + " @" + answer + " can answer your question");
+		 }
+		
+		
 		 statusUpdate.setInReplyToStatusId(status.getId());
 		 try {
 			twitter.updateStatus(statusUpdate);
@@ -91,10 +99,12 @@ public class Answer {
 			}
 			
 	
+		if(nickname.length() != 0){
+			nickname = nickname.substring(0, nickname.length()-1);
+		}
 		
 		
-		nickname = nickname.substring(0, nickname.length()-1);
-		
+		System.out.println("nicke name :" + nickname);
 	
 		return nickname;
 	}
