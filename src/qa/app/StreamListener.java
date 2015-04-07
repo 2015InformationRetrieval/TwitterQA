@@ -5,6 +5,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import qa.app.Answer;
 import qa.connection.Parameter;
+import qa.datahelper.UserHelper;
 import qa.service.UserService;
 import twitter4j.StallWarning;
 import twitter4j.Status;
@@ -14,9 +15,10 @@ import twitter4j.StatusUpdate;
 
 public class StreamListener implements StatusListener{
 	
-	String Neo4j_Path="neo4j-community-2.2.0/ir";
+	//String Neo4j_Path="/Users/jiechen/git/TwitterQA/neo4j-community-2.2.0/ir";
 	private UserService userService = new UserService();
-	GraphDatabaseService graphDataService=new GraphDatabaseFactory().newEmbeddedDatabase(Neo4j_Path);
+	//private UserHelper userHelper = new UserHelper();
+	//GraphDatabaseService graphDataService=new GraphDatabaseFactory().newEmbeddedDatabase(Neo4j_Path);
 	@Override
 	public void onException(Exception arg0) {
 		// TODO Auto-generated method stub
@@ -45,13 +47,17 @@ public class StreamListener implements StatusListener{
 	public void onStatus(Status status) {
 		// TODO Auto-generated method stub
 		System.out.println(status.getUser().getName() + " : " + status.getText());
-		System.out.println(status.getUser().getId());
+		System.out.println(status.getUser().getName()+"  "+status.getUser().getId());
 		
 		if(status.getUser().getId() != Long.parseLong(Parameter.USER_ID )){
 			if(userService.isExist(status.getUser())){
-				Answer.reply(status,graphDataService);
+				System.out.println(status.getUser().getName()+" is in database");
+				Answer.reply(status);
 			}else{
+				System.out.println("Need to create user"+  status.getUser().getName());
+				//userHelper.addUser(status.getUser().getId(), status.getUser().getName());
 				userService.createIndex(status.getUser());
+				Answer.reply(status);
 			}
 			
 		}

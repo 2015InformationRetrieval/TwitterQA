@@ -35,10 +35,10 @@ public class Answer {
 		    twitter= new TwitterFactory(cb.build()).getInstance();
 		} 		
 	}
-	public static void reply(Status status,GraphDatabaseService graphDataService){ 
+	public static void reply(Status status){ 
 		 init();
 		 
-		 StatusUpdate statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName()+ " " + getAnswerer(status.getText().replaceAll(Parameter.USER_NAME, "").toLowerCase(),status.getId(),graphDataService));
+		 StatusUpdate statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName()+ " " + getAnswerer(status.getText().replaceAll(Parameter.USER_NAME, "").toLowerCase(),status.getId()));
 		 statusUpdate.setInReplyToStatusId(status.getId());
 		 try {
 			twitter.updateStatus(statusUpdate);
@@ -48,7 +48,7 @@ public class Answer {
 		}	
 	}
 	
-	public static String getAnswerer(String question, long Uid,GraphDatabaseService graphDataService){
+	public static String getAnswerer(String question, long Uid){
 		//return users' nickname
 		TextTokenizer token=new TextTokenizer(question);
 		List<String> query=new ArrayList<String>();
@@ -64,7 +64,7 @@ public class Answer {
 		int i=0;
 		while(i<query.size()){
 			String index=query.get(i);
-			answerer=find.findAnswer(index,Uid,graphDataService);
+			answerer=find.findAnswer(index,Uid);
 			i++;
 		}
 		

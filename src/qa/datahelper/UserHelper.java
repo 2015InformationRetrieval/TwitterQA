@@ -40,7 +40,7 @@ public  class UserHelper {
 	
 	 ExecutionEngine engine;	
 	 
-	 private static final String DB_PATH = "neo4j-community-2.2.0/ir";
+	 private static final String DB_PATH = "ir";
 	 GraphDatabaseService db = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
 	 
 	 // two labels in neo4j, Index and User
@@ -253,7 +253,7 @@ public  class UserHelper {
 	  * @param userId: the twitter_id of the user
 	  * @param followeingId: the twitter_id of the following of the user
 	  */
-	public void addFollowing(long userId, long followingId, String name) {
+	public void addFollowing(long userId, long followingId, String name ) {
 		// TODO Auto-generated method stub
 		 
 		if (isExistByUserId(userId)) {
@@ -292,16 +292,17 @@ public  class UserHelper {
 	  * @param word: the query word 
 	  * @param graphDataService: the address of database
 	  */
-	public Node findIndex(String word, GraphDatabaseService graphDataService){
+	public Node findIndex(String word){
 	
 		Node node = null;
-		ExecutionEngine engine = new ExecutionEngine(graphDataService);
+		ExecutionEngine engine = new ExecutionEngine(db);
 		ExecutionResult result;
 		
-		try(Transaction transction=graphDataService.beginTx()){
+		try(Transaction transction=db.beginTx()){
 			//suppose it's called value
 			result=engine.execute("MATCH (a) Where a.value='"+ word + "' RETURN  a");
 			node=(Node) result.columnAs("a");
+			transction.success();
 		}
 		 return node;	
 	}
@@ -312,19 +313,20 @@ public  class UserHelper {
 	  * @param Uid: the questioner's id
 	  * @param graphDataService: the address of database
 	  */
-	public Set<Node> findAnswer(String index,Long Uid,GraphDatabaseService graphDataService){
+	public Set<Node> findAnswer(String index,Long Uid){
 		
 		 Set<Node> users = new HashSet<>();
-		 ExecutionEngine engine = new ExecutionEngine(graphDataService);
+		 ExecutionEngine engine = new ExecutionEngine(db);
 		 ExecutionResult result;
 		 
-		 try(Transaction transction=graphDataService.beginTx()){
+		 try(Transaction transction=db.beginTx()){
 			 //suppose the relationship called 'BELONG_TO' and `FOLLOWING`, 
 			 result=engine.execute("MATCH (a)-[:`BELONG_TO`]->(b)-[:`FOLLOWING`]->(c) where a.value='"+index+"' and c.id='"+Uid+"' RETURN b");
 			 for(Map<String,Object> map : result){
 				 Node temp=(Node) map.get("b");
 				 users.add(temp);	 
-			 }     
+			 } 
+			 transction.success();
 		 }
 		 return users;
 	}
@@ -334,19 +336,20 @@ public  class UserHelper {
 	  * @param id: the id of the user
 	  * @param graphDataService: the address of database
 	  */
-	public Set<Node> findFollowed(Long id,GraphDatabaseService graphDataService){
+	public Set<Node> findFollowed(Long id){
 		
 		Set<Node> users = new HashSet<>();
-		ExecutionEngine engine = new ExecutionEngine(graphDataService);
+		ExecutionEngine engine = new ExecutionEngine(db);
 		ExecutionResult result;
 		
-		try(Transaction transction=graphDataService.beginTx()){
+		try(Transaction transction=db.beginTx()){
 			//suppose the relationship named 'FOLLOWED', and the property called id
 			result=engine.execute("MATCH (a)-[:`FOLLOWED`]->(b) where b.id='"+id+"' RETURN a");
 			 for(Map<String,Object> map : result){
 				 Node temp=(Node) map.get("a");
 				 users.add(temp);	 
 			 }
+			 transction.success();
 		}	
 		return users;
 	}

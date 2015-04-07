@@ -1,5 +1,8 @@
 package qa.service;
 
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+
 import qa.analysis.TextTokenizer;
 import qa.connection.Parameter;
 import qa.datahelper.UserHelper;
@@ -16,10 +19,14 @@ public class UserService {
 	private UserHelper userHelper = new UserHelper();
 	private static Twitter twitter = null;
 	
+	//private static final String DB_PATH = "/Users/jiechen/Google Drive/Eclipse-Luna/neo4j-community-2.2.0-M02/ir";
+	//GraphDatabaseService db = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
+	
 	public boolean isExist(User user) {
 		// TODO Auto-generated method stub
 		return userHelper.isExistByUserId(user.getId());
 	}
+	
 	public UserService(){
 		if(twitter == null){
 			ConfigurationBuilder cb = new ConfigurationBuilder();
@@ -31,18 +38,21 @@ public class UserService {
 		    twitter= new TwitterFactory(cb.build()).getInstance();
 		} 
 	}
+	
 	public void createIndex(User user) {
 		// TODO Auto-generated method stub
 		
 		try {
 			
 			// construct the follower index
+			userHelper.addUser(user.getId(), user.getName());
 			IDs followerIter = null;
 			followerIter = twitter.getFollowersIDs(user.getId(), -1);
 			long[] followers = followerIter.getIDs();
+			
 			for(long id : followers){
-				System.out.println(id);
-				userHelper.addFollower(user.getId(), id,getScreenNameById(id));
+				System.out.println("Follower: "+id+"  "+getScreenNameById(id));
+				userHelper.addFollower(user.getId(),id,getScreenNameById(id));
 				if(!userHelper.isExistByUserId(id)){
 					parseUser(id);
 				}
@@ -53,7 +63,7 @@ public class UserService {
 			following = twitter.getFriendsIDs(user.getId(), -1);
 			long[] followings = following.getIDs();
 			for(long id : followings){
-				System.out.println(id);
+				System.out.println("Following: "+id+"  "+getScreenNameById(id));
 				userHelper.addFollowing(user.getId(), id, getScreenNameById(id));
 				if(!userHelper.isExistByUserId(id)){
 					parseUser(id);
