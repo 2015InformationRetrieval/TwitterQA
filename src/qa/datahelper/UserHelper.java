@@ -46,7 +46,7 @@ public  class UserHelper {
 	 //GraphDatabaseService db = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
 	 
 	 public UserHelper () {
-		 DB_PATH = "ir";
+		 DB_PATH = "neo4j-community-2.2.0/ir";
 		 if (db == null) {
 			 db = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
 		 }

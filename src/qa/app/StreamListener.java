@@ -19,7 +19,7 @@ public class StreamListener implements StatusListener{
 	
 	private UserService userService = new UserService();
 	
-	//private UserHelper userHelper = new UserHelper();
+	private UserHelper userHelper = new UserHelper();
 	//GraphDatabaseService graphDataService=new GraphDatabaseFactory().newEmbeddedDatabase(Neo4j_Path);
 	@Override
 	public void onException(Exception arg0) {
@@ -54,16 +54,16 @@ public class StreamListener implements StatusListener{
 		if(status.getUser().getId() != Long.parseLong(Parameter.USER_ID )){
 			if(userService.isExist(status.getUser())){
 				System.out.println(status.getUser().getName()+" is in database");
-				//Answer.reply(status);
+				Answer.reply(status);
 			}else{
 				System.out.println("Need to create user"+  status.getUser().getName());
-				//userHelper.addUser(status.getUser().getId(), status.getUser().getName());
+				userHelper.addUser(status.getUser().getId(), status.getUser().getName());
 				userService.createIndex(status.getUser());
-				//Answer.reply(status);
+				Answer.reply(status);
 			}
 			
 			
-			//Answer.reply(status);
+			
 			
 		}
 			
