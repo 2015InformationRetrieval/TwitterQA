@@ -44,7 +44,7 @@ public class Answer {
 	public static void reply(Status status){ 
 		 init();
 		 String question = status.getText().replaceAll(Parameter.USER_NAME, "");
-		 StatusUpdate statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName()+ "For your question: " + question + getAnswerer(question.toLowerCase(),status.getUser().getId()));
+		 StatusUpdate statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName()+ "For your question: " + question + getAnswerer(question.toLowerCase(),status.getUser().getId()) + " can answer your question");
 		 statusUpdate.setInReplyToStatusId(status.getId());
 		 try {
 			twitter.updateStatus(statusUpdate);
@@ -62,7 +62,7 @@ public class Answer {
 		
 		TextTokenizer token=new TextTokenizer(question);
 		List<String> query=new ArrayList<String>();
-		String nickname = null;
+		String nickname = "";
 		Set<String> answerer=new HashSet<>();
 		
 		

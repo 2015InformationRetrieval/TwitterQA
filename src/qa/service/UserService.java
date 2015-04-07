@@ -63,6 +63,8 @@ public class UserService {
 			following = twitter.getFriendsIDs(user.getId(), -1);
 			long[] followings = following.getIDs();
 			for(long id : followings){
+				if(id == Long.parseLong(Parameter.USER_ID))
+					continue;
 				System.out.println("Following: "+id+"  "+getScreenNameById(id));
 				userHelper.addFollowing(user.getId(), id, getScreenNameById(id));
 				if(userHelper.isExistByUserId(id)){
