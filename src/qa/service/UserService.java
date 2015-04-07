@@ -53,7 +53,7 @@ public class UserService {
 			for(long id : followers){
 				System.out.println("Follower: "+id+"  "+getScreenNameById(id));
 				userHelper.addFollower(user.getId(),id,getScreenNameById(id));
-				if(!userHelper.isExistByUserId(id)){
+				if(userHelper.isExistByUserId(id)){
 					parseUser(id);
 				}
 			}
@@ -65,10 +65,11 @@ public class UserService {
 			for(long id : followings){
 				System.out.println("Following: "+id+"  "+getScreenNameById(id));
 				userHelper.addFollowing(user.getId(), id, getScreenNameById(id));
-				if(!userHelper.isExistByUserId(id)){
+				if(userHelper.isExistByUserId(id)){
 					parseUser(id);
 				}
 			}
+			
 		} catch (TwitterException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

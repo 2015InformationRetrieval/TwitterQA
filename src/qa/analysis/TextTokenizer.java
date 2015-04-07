@@ -21,29 +21,27 @@ public class TextTokenizer {
 	public TextTokenizer( String text ) {
 		// this constructor will tokenize the input texts (usually it is a char array for a whole document)
 		
-		char[] texts = text.toCharArray();
-		int j = 0;
+		//char[] texts = text.toCharArray();
+		String[] texts=text.split("\\s+");
+		
 		for(int i = 0;i < texts.length;i++){
-			//if there is a white space, the word ends
-			if(texts[i] == ' '){
-				char[] word = new char[i - j];
-				int poi = 0;
-			    while(j < i){
-			    	word[poi] = texts[j];
-			    	poi++;
-			    	j++;
-			    }
-			    String tmp = new String(word).toLowerCase();
-			    if(!StopwordsRemover.isStopword(tmp)){
-			    	 list.add(tmp);
-					    j++;
+			
+			//int len=texts[i].length();
+			while(texts[i].length()>1 && !Character.isLetter(texts[i].charAt(texts[i].length()-1))){
+				texts[i]=texts[i].substring(0, texts[i].length()-1);
+				}	
+		    String tmp = texts[i].toLowerCase();
+			if(!StopwordsRemover.isStopword(tmp)){
+			    	 list.add(tmp);	    
 			    }
 			   
 			}
 			
+			System.out.println(list);
 		}
 		
-	}
+		
+	
 	
 	// YOU MUST IMPLEMENT THIS METHOD
 	public String nextWord() {
@@ -59,7 +57,8 @@ public class TextTokenizer {
 	}
 	
 	public static void main(String args[]){
-		TextTokenizer t = new TextTokenizer("I Think it as a good idea");
+		TextTokenizer t = new TextTokenizer("  pitts chis, sio");
+		System.out.println(t);
 		String a;
 		while((a = t.nextWord()) != null){
 			System.out.println(a);

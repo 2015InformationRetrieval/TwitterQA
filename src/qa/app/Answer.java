@@ -5,9 +5,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
- 
+
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.omg.CORBA.PUBLIC_MEMBER;
 
 import qa.analysis.TextTokenizer;
@@ -23,6 +25,9 @@ import twitter4j.conf.ConfigurationBuilder;
 
 public class Answer {
 	private static Twitter twitter = null;
+	private static UserHelper userHelper = new UserHelper();
+	 //private static final String DB_PATH = "neo4j-community-2.2.0/test";
+	 //static GraphDatabaseService db = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
 	
 	public static void init(){
 		if(twitter == null){
@@ -38,10 +43,11 @@ public class Answer {
 	public static void reply(Status status){ 
 		 init();
 		 
-		 StatusUpdate statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName()+ " " + getAnswerer(status.getText().replaceAll(Parameter.USER_NAME, "").toLowerCase(),status.getId()));
+		 StatusUpdate statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName()+ " " + getAnswerer(status.getText().replaceAll(Parameter.USER_NAME, "").toLowerCase(),status.getUser().getId()));
 		 statusUpdate.setInReplyToStatusId(status.getId());
 		 try {
 			twitter.updateStatus(statusUpdate);
+			System.out.println("------DONE-----");
 		}catch (TwitterException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -50,33 +56,44 @@ public class Answer {
 	
 	public static String getAnswerer(String question, long Uid){
 		//return users' nickname
+		System.out.println("QUESTION :"+question);
+		System.out.println("UID :"+Uid);
+		
 		TextTokenizer token=new TextTokenizer(question);
 		List<String> query=new ArrayList<String>();
 		String nickname = null;
-		Set<Node> answerer=new HashSet<>();
-		UserHelper find=new UserHelper();
+		Set<String> answerer=new HashSet<>();
 		
-		while(token.nextWord()!=null){
-			query.add(token.nextWord());
+		
+		//System.out.println(token);
+		String temp;
+
+		while((temp=token.nextWord())!=null){
+			System.out.println("-----");
+			System.out.println(temp);
+			query.add(temp);
 		}
 		
 		//find user by question
 		int i=0;
 		while(i<query.size()){
 			String index=query.get(i);
-			answerer=find.findAnswer(index,Uid);
+			System.out.println(index);
+			answerer.addAll(userHelper.findAnswer(index,Uid));
 			i++;
 		}
+		System.out.println("This is the results: "+answerer);
 		
-		for(Node node:answerer){
-			nickname+=node.getProperty("Nick_Name").toString();
-			nickname+=",";	
-		}
+			for(String name:answerer){
+				nickname+=name;
+				nickname+=",";	
+			}
+			
+	
+		
 		
 		nickname = nickname.substring(0, nickname.length()-1);
-		/*String answer = "I got you";
-		if(question.contains("changjiang"))
-			answer = "3,915 miles (6,300 km)";*/
+		
 	
 		return nickname;
 	}

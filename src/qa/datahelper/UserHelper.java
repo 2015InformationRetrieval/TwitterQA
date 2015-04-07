@@ -40,18 +40,8 @@ public  class UserHelper {
 	
 	 ExecutionEngine engine;	
 	 
-	 private static String DB_PATH;
-	 private static GraphDatabaseService db;
-	 //private static final String DB_PATH = "ir";
-	 //GraphDatabaseService db = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
-	 
-	 public UserHelper () {
-		 DB_PATH = "ir";
-		 if (db == null) {
-			 db = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
-		 }
-		 
-	 }
+	 private static final String DB_PATH = "neo4j-community-2.2.0/test2";
+	 GraphDatabaseService db = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
 	 
 	 // two labels in neo4j, Index and User
 	 org.neo4j.graphdb.Label Index = DynamicLabel.label("Index"); 
@@ -82,6 +72,7 @@ public  class UserHelper {
 				 user.setProperty("name", Name);
 				 System.out.println("addUser is done");
 				 tx.success();
+				 
 				 
 			 }
 			 
@@ -197,6 +188,7 @@ public  class UserHelper {
 					 Relationship relationship = user_node.createRelationshipTo(index_node, RelTypes.Indexed);
 					 
 					 //match = (String)user_node.getProperty("ID") + ": " + (String)index_node.getProperty("token");
+					 System.out.println("Index this Word--------"+index_node.getProperty("token"));
 					 System.out.println("addIndex is done");
 					 
 					 tx.success();
@@ -300,7 +292,7 @@ public  class UserHelper {
 	/**
 	  * find whether the query word is a index or not
 	  * @param word: the query word 
-	  * @param graphDataService: the address of database
+	  * 
 	  */
 	public Node findIndex(String word){
 	
@@ -319,23 +311,30 @@ public  class UserHelper {
 	
 	/**
 	  * find the followers of the questioner who has the index terms
-	  * @param node: the index node
+	  * @param index: the index node
 	  * @param Uid: the questioner's id
-	  * @param graphDataService: the address of database
 	  */
-	public Set<Node> findAnswer(String index,Long Uid){
+	public Set<String> findAnswer(String index,Long Uid){
 		
-		 Set<Node> users = new HashSet<>();
+		 Set<String> users = new HashSet<>();
 		 ExecutionEngine engine = new ExecutionEngine(db);
 		 ExecutionResult result;
 		 
 		 try(Transaction transction=db.beginTx()){
-			 //suppose the relationship called 'BELONG_TO' and `FOLLOWING`, 
-			 result=engine.execute("MATCH (a)-[:`BELONG_TO`]->(b)-[:`FOLLOWING`]->(c) where a.value='"+index+"' and c.id='"+Uid+"' RETURN b");
+			  
+			 result=engine.execute("MATCH (a)-[:`Followed`]->(b)-[:`Indexed`]-(c) where c.token='"+index+"' and a.ID="+Uid+" RETURN b");
+			//result=engine.execute("MATCH (b:`User`) where b.ID="+Uid+" RETURN b");
+			 //System.out.println("Check Uid: "+Uid);
+			 System.out.println("Check index: "+index);
+			 //result=engine.execute("MATCH (a)-[:`Followed`]-(b) where a.ID="+Uid+" RETURN b");
+			 //result=engine.execute("MATCH (a)-[:`Indexed`]-(b:`User`) where a.token='"+index+"' RETURN b");
+			 //result=engine.execute("MATCH (a)-[:`Indexed`]-(b:`User`) where a.token='pittsburgh' RETURN b");
 			 for(Map<String,Object> map : result){
 				 Node temp=(Node) map.get("b");
-				 users.add(temp);	 
+				 String name=(String) temp.getProperty("name");
+				 users.add(name);	 
 			 } 
+			 System.out.println("This is the partial results: "+users);
 			 transction.success();
 		 }
 		 return users;
@@ -373,7 +372,7 @@ public  class UserHelper {
 	 * no parameter
 	 * return none
 	 */
-    void shutDown()
+    public void shutDown()
     {
         System.out.println();
         System.out.println( "Shutting down database ..." );
