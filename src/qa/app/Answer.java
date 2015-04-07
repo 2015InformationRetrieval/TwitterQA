@@ -1,6 +1,7 @@
 package qa.app;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -42,8 +43,8 @@ public class Answer {
 	}
 	public static void reply(Status status){ 
 		 init();
-		 
-		 StatusUpdate statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName()+ " " + getAnswerer(status.getText().replaceAll(Parameter.USER_NAME, "").toLowerCase(),status.getUser().getId()));
+		 String question = status.getText().replaceAll(Parameter.USER_NAME, "");
+		 StatusUpdate statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName()+ "For your question: " + question + getAnswerer(question.toLowerCase(),status.getUser().getId()));
 		 statusUpdate.setInReplyToStatusId(status.getId());
 		 try {
 			twitter.updateStatus(statusUpdate);
