@@ -40,8 +40,18 @@ public  class UserHelper {
 	
 	 ExecutionEngine engine;	
 	 
-	 private static final String DB_PATH = "ir";
-	 GraphDatabaseService db = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
+	 private static String DB_PATH;
+	 private static GraphDatabaseService db;
+	 //private static final String DB_PATH = "ir";
+	 //GraphDatabaseService db = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
+	 
+	 public UserHelper () {
+		 DB_PATH = "ir";
+		 if (db == null) {
+			 db = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
+		 }
+		 
+	 }
 	 
 	 // two labels in neo4j, Index and User
 	 org.neo4j.graphdb.Label Index = DynamicLabel.label("Index"); 
