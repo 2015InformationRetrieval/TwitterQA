@@ -51,6 +51,7 @@ public  class UserHelper {
 			 db = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
 		 }
 		 
+		 
 	 }
 	 
 	 // two labels in neo4j, Index and User
