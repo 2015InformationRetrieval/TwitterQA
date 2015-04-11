@@ -49,7 +49,7 @@ public class Answer {
 		 if(answer.length() == 0){
 			 statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName() + " For your question: " + question +  " No one can answer your question in your friend circle..");
 		 }else{
-			 statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName()+ " For your question: " + question + " @" + answer + " can answer your question");
+			 statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName()+ " For your question: " + question + answer + " can answer your question");
 		 }
 		
 		
@@ -94,7 +94,7 @@ public class Answer {
 		System.out.println("This is the results: "+answerer);
 		
 			for(String name:answerer){
-				nickname+=name;
+				nickname+="@" + name;
 				nickname+=",";	
 			}
 			
