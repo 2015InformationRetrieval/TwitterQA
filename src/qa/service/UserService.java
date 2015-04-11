@@ -64,7 +64,7 @@ public class UserService {
 			}
 			
 			// construct the following index
-			IDs following = null;
+			/*IDs following = null;
 			following = twitter.getFriendsIDs(user.getId(), -1);
 			long[] followings = following.getIDs();
 			for(long id : followings){
@@ -75,7 +75,7 @@ public class UserService {
 				if(userHelper.isExistByUserId(id)){
 					parseUser(id);
 				}
-			}
+			}*/
 			
 		} catch (TwitterException e) {
 			// TODO Auto-generated catch block
