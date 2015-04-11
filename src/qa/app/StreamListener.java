@@ -52,7 +52,7 @@ public class StreamListener implements StatusListener{
 		System.out.println(status.getUser().getName()+"  "+status.getUser().getId());
 		
 		if(status.getUser().getId() != Long.parseLong(Parameter.USER_ID )){
-			if(userService.isExist(status.getUser())){
+			if(userService.IsExistUserNetwork(status.getUser())){
 				System.out.println(status.getUser().getName()+" is in database");
 				Answer.reply(status);
 			}else{

@@ -27,6 +27,11 @@ public class UserService {
 		return userHelper.isExistByUserId(user.getId());
 	}
 	
+	public boolean IsExistUserNetwork(User user) {
+		// TODO Auto-generated method stub
+		return userHelper.IsExistUserNetwork(user.getId());
+	}
+	
 	public UserService(){
 		if(twitter == null){
 			ConfigurationBuilder cb = new ConfigurationBuilder();
