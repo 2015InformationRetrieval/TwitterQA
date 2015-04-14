@@ -2,8 +2,10 @@ package qa.datahelper;
  
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -51,28 +53,28 @@ public  class UserHelper {
 	 
 	 public UserHelper () {
 
-		 DB_PATH = "ir";
-		 db = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
-//		 if (db == null) {
-//			 db = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
-//		 }
+		 DB_PATH = "neo4j-community-2.2.0/ir";
+		 //db = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
+		 if (db == null) {
+			 db = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
+		 }
 	 }
 	 
 	 // two labels in neo4j, Index and User
 	 org.neo4j.graphdb.Label Index = DynamicLabel.label("Index"); 
 	 org.neo4j.graphdb.Label User = DynamicLabel.label("User");
 	 
-	    private void clearDbPath()
-	    {
-	        try
-	        {
-	            deleteRecursively( new File( DB_PATH ) );
-	        }
-	        catch ( IOException e )
-	        {
-	            throw new RuntimeException( e );
-	        }
-	    }
+//	    private void clearDbPath()
+//	    {
+//	        try
+//	        {
+//	            deleteRecursively( new File( DB_PATH ) );
+//	        }
+//	        catch ( IOException e )
+//	        {
+//	            throw new RuntimeException( e );
+//	        }
+//	    }
 
 	 public static enum RelTypes implements RelationshipType{
 		 
@@ -492,9 +494,10 @@ public  class UserHelper {
 	  * @param index: the index node
 	  * @param Uid: the questioner's id
 	  */
-	public Set<String> findAnswer(String index,Long Uid){
+	public Map<Long, String> findAnswerBL(String index,Long Uid){
 		
-		 Set<String> users = new HashSet<>();
+		 //Set<String> users = new HashSet<>();
+		 Map<Long, String> users =new HashMap<>();
 		 ExecutionEngine engine = new ExecutionEngine(db);
 		 ExecutionResult result;
 		 
@@ -510,13 +513,45 @@ public  class UserHelper {
 			 for(Map<String,Object> map : result){
 				 Node temp=(Node) map.get("b");
 				 String name=(String) temp.getProperty("name");
-				 users.add(name);	 
+				 Long id=(Long)temp.getProperty("ID");
+				 users.put(id, name);
 			 } 
 			 System.out.println("This is the partial results: "+users);
 			 transction.success();
 		 }
 		 return users;
 	}
+	
+	public Map<String, Float> findAnswerProb(Map<Long, String> answerer,List<String> query,Long Uid){
+		
+		 Set<String> users = new HashSet<>();
+		 Map<String, Float> unsort = new HashMap<>();
+		 ExecutionEngine engine = new ExecutionEngine(db);
+		 ExecutionResult result;
+		 
+		 try(Transaction transction=db.beginTx()){
+			  Iterator it = answerer.entrySet().iterator();
+			  while(it.hasNext()){
+				  Map.Entry pair= (Map.Entry) it.next();
+				  String name = (String) pair.getValue();
+				  Long id = (Long) pair.getKey();
+				  float prob = 1;
+				  result = engine.execute("MATCH (a) where a.ID="+id+" RETURN a");
+				  for(Map<String,Object> map : result){
+						 Node ans=(Node) map.get("a");
+						 int D=(int) ans.getProperty("DF");
+						 int V=(int) ans.getProperty("CF");
+						 for(String word:query){
+							 int tf=getTF(word,id);
+							 prob*=(tf+1)/(D+V);
+						 }
+				  }
+				  unsort.put(name,prob);
+			  }
+					 }
+		 return unsort;
+	}
+
 	
 	/**
 	  * find the followers of the user

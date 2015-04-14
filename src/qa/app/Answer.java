@@ -1,11 +1,15 @@
 package qa.app;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -44,7 +48,7 @@ public class Answer {
 	public static void reply(Status status){ 
 		 init();
 		 String question = status.getText().replaceAll(Parameter.USER_NAME, "");
-		 String answer = getAnswerer(question.toLowerCase(),status.getUser().getId());
+		 String answer = getAnswererProb(question.toLowerCase(),status.getUser().getId());
 		 StatusUpdate statusUpdate = null;
 		 if(answer.length() == 0){
 			 statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName() + " For your question: " + question +  " No one can answer your question in your friend circle..");
@@ -63,49 +67,108 @@ public class Answer {
 		}	
 	}
 	
-	public static String getAnswerer(String question, long Uid){
+	public static String getAnswererBL(String question, long Uid){
 		//return users' nickname
 		System.out.println("QUESTION :"+question);
 		System.out.println("UID :"+Uid);
-		
 		TextTokenizer token=new TextTokenizer(question);
 		List<String> query=new ArrayList<String>();
 		String nickname = "";
-		Set<String> answerer=new HashSet<>();
-		
-		
-		//System.out.println(token);
+		Map<Long, String> answerer = new HashMap<>();
 		String temp;
-
+		
 		while((temp=token.nextWord())!=null){
 			System.out.println("-----");
 			System.out.println(temp);
 			query.add(temp);
 		}
-		
 		//find user by question
 		int i=0;
 		while(i<query.size()){
 			String index=query.get(i);
 			System.out.println(index);
-			answerer.addAll(userHelper.findAnswer(index,Uid));
+			answerer.putAll(userHelper.findAnswerBL(index,Uid));
 			i++;
 		}
-		System.out.println("This is the results: "+answerer);
-		
-			for(String name:answerer){
-				nickname+="@" + name;
-				nickname+=",";	
-			}
-			
+		Iterator it = answerer.entrySet().iterator();
+		while(it.hasNext()){
+			Map.Entry pair = (Map.Entry) it.next();
+			String tmp = (String) pair.getKey();
+			nickname+=tmp;
+			nickname+=",";
+		}
 	
 		if(nickname.length() != 0){
 			nickname = nickname.substring(0, nickname.length()-1);
 		}
-		
-		
-		System.out.println("nicke name :" + nickname);
+		//System.out.println("nicke name :" + nickname);
 	
 		return nickname;
 	}
+	
+	public static String getAnswererProb(String question, long Uid){
+		//return users' nickname
+		System.out.println("QUESTION :"+question);
+		System.out.println("UID :"+Uid);
+		TextTokenizer token=new TextTokenizer(question);
+		List<String> query=new ArrayList<String>();
+		String nickname = "";
+		Map<Long, String> answerer = new HashMap<>();
+		Map<String, Float> unsort = new HashMap<>();
+		ValueComparator bvc =  new ValueComparator(unsort);
+		TreeMap<String, Float> sorted=new TreeMap<>(bvc);
+		//System.out.println(token);
+		String temp;
+		while((temp=token.nextWord())!=null){
+			System.out.println("-----");
+			System.out.println(temp);
+			query.add(temp);
+		}
+		//find user by question
+		int i=0;
+		while(i<query.size()){
+			String index=query.get(i);
+			System.out.println(index);
+			answerer.putAll(userHelper.findAnswerBL(index,Uid));
+			i++;
+		}
+		
+		unsort = userHelper.findAnswerProb(answerer,query,Uid);
+		sorted.putAll(unsort);
+		
+		System.out.println("This is the results: "+sorted);
+		Iterator itera = sorted.entrySet().iterator();
+		while(itera.hasNext()){
+			Map.Entry pair = (Map.Entry) itera.next();
+			String name = (String) pair.getKey();
+			nickname+=name;
+			nickname+=",";	
+		}
+			
+		if(nickname.length() != 0){
+			nickname = nickname.substring(0, nickname.length()-1);
+		}
+		//System.out.println("nicke name :" + nickname);
+	
+		return nickname;
+	}
+	
 }
+
+class ValueComparator implements Comparator<String> {
+
+    Map<String, Float> base;
+    public ValueComparator(Map<String, Float> base) {
+        this.base = base;
+    }
+
+    // Note: this comparator imposes orderings that are inconsistent with equals.    
+    public int compare(String a, String b) {
+        if (base.get(a) >= base.get(b)) {
+            return -1;
+        } else {
+            return 1;
+        } // returning 0 would merge keys
+    }
+}
+
