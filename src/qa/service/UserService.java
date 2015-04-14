@@ -63,6 +63,7 @@ public class UserService {
 				}
 			}
 			
+			userHelper.updateCF(user.getId());
 			// construct the following index
 			/*IDs following = null;
 			following = twitter.getFriendsIDs(user.getId(), -1);
