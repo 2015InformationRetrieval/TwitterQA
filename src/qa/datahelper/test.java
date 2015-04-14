@@ -13,7 +13,21 @@ public class test {
 	public static void main(String[] args) {
 		
 			UserHelper uh = new UserHelper();
-			uh.addUser(25,"Fu_Jun");
+
+//			uh.addUser(30,"Chongqing");
+//			uh.addFollower(30, 25, "Chengdu");
+//			uh.addIndex("Hot",25);
+//			uh.addIndex("HotPot",30);
+			
+			System.out.println(uh.updateCF(30));
+
+			//uh.get
+//			uh.addUser(30,"Chongqing");
+//			uh.addIndex("HotPot",30);
+//			boolean result = uh.checkRelationShipToken("HotPot",30);
+//			System.out.println(result);
+			//uh.addFollower(30, 25, "Chengdu");
+			//uh.addUser(25,"Fu_Jun");
 			//uh.addIndex("Sichuan", 25);
 			//uh.addIndex("ChengDu", 25);
 			//uh.addFollower(25, 24, "Cheng_Ang");

@@ -1,5 +1,7 @@
 package qa.datahelper;
  
+import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -13,6 +15,7 @@ import org.neo4j.graphdb.Transaction;
 
 import twitter4j.User;
 
+import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
@@ -32,6 +35,8 @@ import org.neo4j.tooling.GlobalGraphOperations;
 import org.neo4j.graphdb.DynamicLabel; // add a label
 import org.neo4j.graphdb.Label;
 
+import static org.neo4j.kernel.impl.util.FileUtils.deleteRecursively;
+
 public  class UserHelper {
 	
 	// there are two labels in this Neo4j. 
@@ -45,21 +50,34 @@ public  class UserHelper {
 	 //GraphDatabaseService db = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
 	 
 	 public UserHelper () {
-		 DB_PATH = "neo4j-community-2.2.0/ir";
-		 if (db == null) {
-			 db = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
-		 }
-		 
+
+		 DB_PATH = "ir";
+		 db = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
+//		 if (db == null) {
+//			 db = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
+//		 }
 	 }
 	 
 	 // two labels in neo4j, Index and User
 	 org.neo4j.graphdb.Label Index = DynamicLabel.label("Index"); 
 	 org.neo4j.graphdb.Label User = DynamicLabel.label("User");
+	 
+	    private void clearDbPath()
+	    {
+	        try
+	        {
+	            deleteRecursively( new File( DB_PATH ) );
+	        }
+	        catch ( IOException e )
+	        {
+	            throw new RuntimeException( e );
+	        }
+	    }
 
 	 public static enum RelTypes implements RelationshipType{
 		 
 		 Indexed,
-		 Following, // Following shows that a user is following other users
+		 // Following, // Following shows that a user is following other users
 		 Followed   // Followed shows that a user is followed by other users
 		 
 	}
@@ -73,22 +91,37 @@ public  class UserHelper {
 	public boolean IsExistUserNetwork(long id) {
 		 
 		 Set<String> container = new HashSet<String>();
-		 //Set<RelationshipType> contain = new HashSet<RelationshipType>();
-		 try ( Transaction tx = db.beginTx()) {
-			 if ( isExistByUserId(id) ) {
-				 //Iterator<RelationshipType> itea_type = db.getRelationshipTypes();
-				 Iterable<RelationshipType> itea_type = db.getRelationshipTypes();
-				 Iterator<RelationshipType> itea = itea_type.iterator();
-				 while( itea.hasNext()) {
-					 String name = itea.next().name();
-					 container.add(name);
+		 
+		 if ( isExistByUserId (id)) {
+			try ( Transaction rx = db.beginTx() ) {
+				 ResourceIterator<Node> iterator_user = db.findNodesByLabelAndProperty(User, "ID", id).iterator();
+				 Node user_node = iterator_user.next();
+				 Relationship relation_indexed = user_node.getSingleRelationship(RelTypes.Indexed, Direction.OUTGOING);
+				 Relationship relation_followed = user_node.getSingleRelationship(RelTypes.Followed, Direction.INCOMING);
+				 rx.success();
+				 if (relation_indexed != null && relation_followed != null) {
+					 return true;
 				 }
 			 }
-		 } // end try
-		 
-		 if ( container.contains("Indexed") && container.contains("Following") && container.contains("Followed") ) {
-			 return true;
+		 } else {
+			 System.out.println("userID: " + id + " is not in neo4j. Thus no exsiting network");
 		 }
+//		 //Set<RelationshipType> contain = new HashSet<RelationshipType>();
+//		 try ( Transaction tx = db.beginTx()) {
+//			 if ( isExistByUserId(id) ) {
+//				 //Iterator<RelationshipType> itea_type = db.getRelationshipTypes();
+//				 Iterable<RelationshipType> itea_type = db.getRelationshipTypes();
+//				 Iterator<RelationshipType> itea = itea_type.iterator();
+//				 while( itea.hasNext()) {
+//					 String name = itea.next().name();
+//					 container.add(name);
+//				 }
+//			 }
+//		 } // end try
+//		 
+//		 if ( container.contains("Indexed") && container.contains("Followed") ) {
+//			 return true;
+//		 }
 
 		 return false;
 	 }
@@ -103,14 +136,16 @@ public  class UserHelper {
 		 if ( !isExistByUserId(userId) ) {
 			 
 			 try( Transaction tx =  db.beginTx()) {
-				 
+				 int df = 0;
+				 int cf = 0;
 				 Node user = db.createNode();
 				 user.addLabel(User);
 				 user.setProperty("ID", userId);
 				 user.setProperty("name", Name);
+				 user.setProperty("DF", df);
+				 user.setProperty("CF",cf);
 				 System.out.println("addUser is done");
 				 tx.success();
-				 	 
 			 }
 			 
 		 } else {
@@ -155,44 +190,183 @@ public  class UserHelper {
 	} 
 	
 	/**
+	 * check if there exist relationship between token and id
+	 * @param token
+	 * @param id
+	 * @return
+	 */
+	public boolean checkRelationShipToken(String token, long id) {
+
+		ExecutionEngine engine = new ExecutionEngine(db);
+		ExecutionResult result; 
+		
+		try ( Transaction tx = db.beginTx()) {
+			
+			String query = "MATCH (a:User) -[type:Indexed]-> (b:Index) where a.ID=" + id + " and b.token='" + token + "' return type" ;
+			result = engine.execute(query);
+			tx.success();
+			
+			if (result == null ) {
+				return false;
+			} else {
+				return true;
+			}
+		} // end try
+
+	} // end checkRelationShipToken
+	
+	/**
+	 * check is there a relationship Followed from follower to user
+	 * @param id1
+	 * @param id2
+	 * @return
+	 */
+	public boolean checkRelationShipUser(long user, long follower) {
+		
+		ExecutionEngine engine = new ExecutionEngine(db);
+		ExecutionResult result; 
+		
+		try ( Transaction tx = db.beginTx()) {
+			
+			String query = "MATCH (user:User) <-[type:Followed]- (follower:User) where user.ID=" + user + " and follower.ID=" + follower + " return type" ;
+			result = engine.execute(query);
+			tx.success();
+			
+			if (result == null ) {
+				return false;
+			} else {
+				return true;
+			}
+		} // end try 
+
+	} // end checkRelationShipUser
+	
+	/**
+	 * on the condition that there is relationship between token and id
+	 * get the term frequency of this token indexed by id
+	 * @param token
+	 * @param id
+	 * @return
+	 */
+	public int getTF(String token, long id) {
+		
+		ExecutionEngine engine = new ExecutionEngine(db);
+		ExecutionResult result; 
+
+		int resultTF = 0;
+		
+		try ( Transaction tx = db.beginTx()) {
+			
+			String query = "MATCH (a:User) -[type:Indexed]-> (b:Index) where a.ID=" + id + " and b.token='" + token + "' return type" ;
+			result = engine.execute(query);
+			
+			for (Map<String, Object> map : result) {
+				
+				Relationship rs = (Relationship)map.get("type");
+				resultTF = (int) rs.getProperty("TF");
+				tx.success();	
+			} // end for
+		} // end try
+
+		return resultTF;
+
+	} // end getTF
+	
+	/**
+	 * update the whole collection frequency of this userID. 
+	 * Only when we finished add index to each user, we can update its CF from its followers
+	 * each follower would be viewed as a document, and the user asking questions would be viewed as colletion
+	 * @param userID
+	 */
+	public int updateCF(long userID) {
+		
+		int userID_CF = 0;
+		
+		if ( isExistByUserId(userID) ) {
+			
+			 try ( Transaction tx =  db.beginTx() ) {
+				 
+				 ResourceIterator<Node> iterator_user = db.findNodesByLabelAndProperty(User, "ID", userID).iterator();
+				 Node user_node = iterator_user.next();
+				 Iterator<Relationship> rels = user_node.getRelationships(RelTypes.Followed, Direction.INCOMING).iterator();
+				 int CF = (int) user_node.getProperty("CF");
+				 
+				 while (rels.hasNext()) {
+					 
+					 Relationship rel = rels.next();
+					 Node follower = rel.getOtherNode(user_node);
+					 int DF = (int) follower.getProperty("DF"); 
+					 userID_CF = userID_CF + DF;
+					 
+				 } // end while
+				 
+				 user_node.setProperty("CF",userID_CF);
+				 tx.success();
+			 } // end try
+		
+		} else {
+			System.out.println("userID: " + userID + " is not in neo4j." );
+		}
+		
+		System.out.println("the collection frequency of this userID: " + userID + " is " + userID_CF);
+		return userID_CF;
+		
+	} // end updateCF
+	
+	
+	/**
 	  * add the a term under a specific user
 	  * @param token: the term add to the index
  	  * @param id: the twitter_id of the user
 	  */
 	public void addIndex(String token, long id) {
-		// TODO Auto-generated method stub
-		
-		String match;
-		
-		// check the id if id is in neo4j or not
-		if (isExistByUserId(id)) {
+
+		if (isExistByUserId(id)) { // user id is in neo4j
 			
 			if (isExistByIndex(token)) { // token is already in neo4j
-				
-				 try( Transaction tx =  db.beginTx()) { // create relationship betwen token and id
-					 
-					 
-					 ResourceIterator<Node> iterator_user = db.findNodesByLabelAndProperty(User, "ID", id).iterator();
-					 
-					 ResourceIterator<Node> iterator_index= db.findNodesByLabelAndProperty(Index, "token", token).iterator();
-					 
-					 // there is only one node in iterator1
-					 Node user_node = iterator_user.next();
-					 // there is only one node in iterator2
-					 Node index_node = iterator_index.next();
-					 
-					 Relationship relationship = user_node.createRelationshipTo(index_node, RelTypes.Indexed);
-					 
-					 //match = (String)user_node.getProperty("ID") + ": " + (String)index_node.getProperty("token");
-					 System.out.println("addIndex is done");
-					 
-					 tx.success();
-					 
+				 System.out.println("token: " + token + " is already in database" );
+				 try( Transaction tx =  db.beginTx() ) { // create relationship betwen token and id
+
+					 if ( checkRelationShipToken(token, id) ) { // there exist relationship between token and id
+						 
+						 ResourceIterator<Node> iterator_user = db.findNodesByLabelAndProperty(User, "ID", id).iterator();
+						 //ResourceIterator<Node> iterator_index= db.findNodesByLabelAndProperty(Index, "token", token).iterator();
+						 
+						 Node user_node = iterator_user.next();
+						 int df = (int) user_node.getProperty("DF") + 1;
+						 user_node.setProperty("DF", df);
+						 
+						 //Node index_node = iterator_index.next();
+						 Iterator<Relationship> rels = user_node.getRelationships(RelTypes.Indexed, Direction.OUTGOING).iterator();
+						 while (rels.hasNext()) {
+							 Relationship rel = rels.next();
+							 String rel_token = (String) rel.getOtherNode(user_node).getProperty("token");
+							 if ( rel_token.equals(token) ) {
+								 rel.setProperty("TF", getTF(token,id) + 1);
+							 }
+						 }
+						 System.out.println("the new DF of ID: " + id + " is " + getTF(token, id));
+						 tx.success();
+
+					 } else { // need to create some relationship between id and token
+						 ResourceIterator<Node> iterator_user = db.findNodesByLabelAndProperty(User, "ID", id).iterator();
+						 ResourceIterator<Node> iterator_index= db.findNodesByLabelAndProperty(Index, "token", token).iterator();
+						 
+						 Node user_node = iterator_user.next();  // there is only one node in iterator1
+						 int df = (int) user_node.getProperty("DF") + 1;
+						 user_node.setProperty("DF", df);
+						 
+						 Node index_node = iterator_index.next();  // there is only one node in iterator2
+						 
+						 Relationship relationship = user_node.createRelationshipTo(index_node, RelTypes.Indexed);
+						 relationship.setProperty("TF",1);
+						 
+						 System.out.println("index: " + token + " is already in neo4j. Add Relationship Indexed to " + id);
+						 tx.success();
+					 }
+
 				 }
-				 
-				 //System.out.println(match);
-				
-				
+
 			} else { // create a node with property token: token
 				
 				 try( Transaction tx =  db.beginTx()) { // create relationship betwen token and id
@@ -204,27 +378,29 @@ public  class UserHelper {
 					 ResourceIterator<Node> iterator_user = db.findNodesByLabelAndProperty(User, "ID", id).iterator();
 					 Node user_node = iterator_user.next();
 					 
+					 // receive the current document frequency and add ones
+					 int df = (int) user_node.getProperty("DF") + 1;
+					 user_node.setProperty("DF", df);
+					 
+					 
 					 Relationship relationship = user_node.createRelationshipTo(index_node, RelTypes.Indexed);
 					 
-					 //match = (String)user_node.getProperty("ID") + ": " + (String)index_node.getProperty("token");
-					 System.out.println("Index this Word--------"+index_node.getProperty("token"));
-					 System.out.println("addIndex is done");
-					 
+					 // the term frequency of term is one
+					 relationship.setProperty("TF",1);
+
+					 System.out.println("Index: " + token + " is not in neo4j. First create a node then add relationship Indexed to " + id);
 					 tx.success();
 					 
 				 }
-				 
-				 //System.out.println(match);
-								
+		
 			}		
 			
 		} else { // user id is not in neo4j, should send errors
-			System.out.println("errors user: " + id + "is not in neo4j");
+			System.out.println("errors user: " + id + " is not in neo4j");
 		}
 		
-		
 	} // end addIndex
-
+  
 
 	/**
 	  * add the follower of the user
@@ -236,24 +412,30 @@ public  class UserHelper {
 		// TODO Auto-generated method stub
 		
 		if (isExistByUserId(userId)) { // check userId is in neo4j or not
-			// check followerId is in neo4j or not
-			if ( isExistByUserId(followerId)) {  
-				// followerId is in neo4j, we only need to find this person
-				try ( Transaction tx = db.beginTx() ) {
+
+			if ( isExistByUserId(followerId)) { // followedId is in neo4j, we only need to find this follower
+				
+				if ( checkRelationShipUser(userId, followerId) ) { // there is already some relationship between userId and followerId
 					
-					ResourceIterator<Node> itea_follower = db.findNodesByLabelAndProperty(User,"ID",followerId).iterator();
-					Node follower_node = itea_follower.next();
+					System.out.println("followerId: " + followerId + " already Followed " + "userId: " + userId);
+					
+				} else {  // there is no relationship between userId and followerId
+					
+					try ( Transaction tx = db.beginTx() ) {
 						
-					ResourceIterator<Node> iterator_user = db.findNodesByLabelAndProperty(User, "ID", userId).iterator();
-					Node user_node = iterator_user.next();
-					
-					// user is followed by follower
-					Relationship relationship1 = user_node.createRelationshipTo(follower_node, RelTypes.Followed);
-					 
-					// follower is following user
-					Relationship relationship2 = follower_node.createRelationshipTo(user_node, RelTypes.Following);
-					 
-					tx.success();
+						ResourceIterator<Node> itea_follower = db.findNodesByLabelAndProperty(User,"ID",followerId).iterator();
+						Node follower_node = itea_follower.next();
+							
+						ResourceIterator<Node> iterator_user = db.findNodesByLabelAndProperty(User, "ID", userId).iterator();
+						Node user_node = iterator_user.next();
+
+						Relationship relationship1 = follower_node.createRelationshipTo(user_node, RelTypes.Followed);
+
+						System.out.println("followerId: "+ followerId +" is in neo4j. AddFollower is done");	
+						 
+						tx.success();
+						
+					} // end try 
 				}
 
 			} else { // followerId is not in the neo4j
@@ -264,17 +446,15 @@ public  class UserHelper {
 					 follower_node.addLabel(User);
 					 follower_node.setProperty("ID", followerId);
 					 follower_node.setProperty("name", name);
+					 follower_node.setProperty("CF", 0);
+					 follower_node.setProperty("DF", 0);
 					 
 					 // create a user node
 					 ResourceIterator<Node> iterator_user = db.findNodesByLabelAndProperty(User, "ID", userId).iterator();
 					 Node user_node = iterator_user.next();
 					 
-					 // user is followed by follower
-					 Relationship relationship1 = user_node.createRelationshipTo(follower_node, RelTypes.Followed);
-					 
-					 // follower is following user
-					 Relationship relationship2 = follower_node.createRelationshipTo(user_node, RelTypes.Following);
-					 
+					 Relationship relationship2 = follower_node.createRelationshipTo(user_node, RelTypes.Followed);
+		 
 					 System.out.println("followerId: "+ followerId +" is not in neo4j. AddFollower is done");	 
 					 tx.success();
 				 }
@@ -286,71 +466,7 @@ public  class UserHelper {
 		}
 		
 	} // end addFollower
-	
-	/**
-	  * add the following of the user
-	 * @param string 
-	  * @param userId: the twitter_id of the user
-	  * @param followeingId: the twitter_id of the following of the user
-	  */
-	public void addFollowing(long userId, long followingId, String name ) {
-		// TODO Auto-generated method stub
-		 
-		if (isExistByUserId(userId)) {
-			
-			if (isExistByUserId(followingId)) {
-				
-				try ( Transaction tx = db.beginTx()) {
-					// followingId is in neo4j
-					 ResourceIterator<Node> iterator_following = db.findNodesByLabelAndProperty(User, "ID", userId).iterator();
-					 Node following_node = iterator_following.next();
-					 
-					 ResourceIterator<Node> iterator_user = db.findNodesByLabelAndProperty(User, "ID", userId).iterator();
-					 Node user_node = iterator_user.next();
-					 
-					 // following_node is following user_node
-					 Relationship relationship1 = following_node.createRelationshipTo(user_node, RelTypes.Followed);
-					 
-					 // user_node is followed by following_node
-					 Relationship relationship2 = user_node.createRelationshipTo(following_node, RelTypes.Following);
-					 
-					 System.out.println("addFollowing is done");
-					 
-					 tx.success();
-				}
 
-			} else { // followingId is not in neo4j
-				 try( Transaction tx =  db.beginTx()) { 
-					 // create a following node
-					 Node following_node = db.createNode();
-					 following_node.addLabel(User);
-					 following_node.setProperty("ID", followingId);
-					 following_node.setProperty("name", name);
-					 
-					 // create a user node
-					 ResourceIterator<Node> iterator_user = db.findNodesByLabelAndProperty(User, "ID", userId).iterator();
-					 Node user_node = iterator_user.next();
-					 
-					 // following_node is following user_node
-					 Relationship relationship1 = following_node.createRelationshipTo(user_node, RelTypes.Followed);
-					 
-					 // user_node is followed by following_node
-					 Relationship relationship2 = user_node.createRelationshipTo(following_node, RelTypes.Following);
-					 
-					 System.out.println("addFollowing is done");
-					 
-					 tx.success();
-				 }
-			}
-
-			
-		} else { // userId is not in neo4j
-			System.out.println("errors: " + userId + "is not in neo4j");
-		}
-		
-
-	}
-	
 	/**
 	  * find whether the query word is a index or not
 	  * @param word: the query word 
@@ -384,7 +500,7 @@ public  class UserHelper {
 		 
 		 try(Transaction transction=db.beginTx()){
 			  
-			 result=engine.execute("MATCH (a)-[:`Followed`]->(b)-[:`Indexed`]-(c) where c.token='"+index+"' and a.ID="+Uid+" RETURN b");
+			 result=engine.execute("MATCH (a)-[:`Followed`]->(b)-[:`Indexed`]-(c) where c.token='"+index+"' and b.ID="+Uid+" RETURN a");
 			//result=engine.execute("MATCH (b:`User`) where b.ID="+Uid+" RETURN b");
 			 //System.out.println("Check Uid: "+Uid);
 			 System.out.println("Check index: "+index);
@@ -425,8 +541,6 @@ public  class UserHelper {
 		return users;
 	}
 	
-	
-
 	 // end addFollowing
 	
 	/**
@@ -443,6 +557,4 @@ public  class UserHelper {
         // END SNIPPET: shutdownServer
     } // end shutdown
     
-
-
 }
