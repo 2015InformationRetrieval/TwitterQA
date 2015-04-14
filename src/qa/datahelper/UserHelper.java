@@ -503,7 +503,8 @@ public  class UserHelper {
 		 
 		 try(Transaction transction=db.beginTx()){
 			  
-			 result=engine.execute("MATCH (a)-[:`Followed`]->(b)-[:`Indexed`]-(c) where c.token='"+index+"' and b.ID="+Uid+" RETURN a");
+			// result=engine.execute("MATCH (a)-[:`Followed`]->(b)-[:`Indexed`]-(c) where c.token='"+index+"' and b.ID="+Uid+" RETURN a");
+			 result = engine.execute("MATCH (b)<-[:`Followed`]-(a)-[:`Indexed`]-(c) where c.token='"+index+"' and b.ID="+Uid+" RETURN a");
 			//result=engine.execute("MATCH (b:`User`) where b.ID="+Uid+" RETURN b");
 			 //System.out.println("Check Uid: "+Uid);
 			 System.out.println("Check index: "+index);
@@ -511,7 +512,7 @@ public  class UserHelper {
 			 //result=engine.execute("MATCH (a)-[:`Indexed`]-(b:`User`) where a.token='"+index+"' RETURN b");
 			 //result=engine.execute("MATCH (a)-[:`Indexed`]-(b:`User`) where a.token='pittsburgh' RETURN b");
 			 for(Map<String,Object> map : result){
-				 Node temp=(Node) map.get("b");
+				 Node temp=(Node) map.get("a");
 				 String name=(String) temp.getProperty("name");
 				 Long id=(Long)temp.getProperty("ID");
 				 users.put(id, name);
@@ -544,6 +545,8 @@ public  class UserHelper {
 						 for(String word:query){
 							 int tf=getTF(word,id);
 							 prob*=(tf+1)/(D+V);
+							 
+							 
 						 }
 				  }
 				  unsort.put(name,prob);

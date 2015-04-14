@@ -19,7 +19,7 @@ public class test {
 //			uh.addIndex("Hot",25);
 //			uh.addIndex("HotPot",30);
 			
-			System.out.println(uh.updateCF(30));
+			//System.out.println(uh.updateCF(30));
 
 			//uh.get
 //			uh.addUser(30,"Chongqing");
