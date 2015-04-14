@@ -536,22 +536,27 @@ public  class UserHelper {
 				  Map.Entry pair= (Map.Entry) it.next();
 				  String name = (String) pair.getValue();
 				  Long id = (Long) pair.getKey();
-				  float prob = 1;
+				  float prob = (float) 1.0;
+				  System.out.println("------Answerers' Name---:"+name);
 				  result = engine.execute("MATCH (a) where a.ID="+id+" RETURN a");
 				  for(Map<String,Object> map : result){
+					     System.out.println("-----------Prob Result:-----"+map);
 						 Node ans=(Node) map.get("a");
 						 int D=(int) ans.getProperty("DF");
 						 int V=(int) ans.getProperty("CF");
 						 for(String word:query){
 							 int tf=getTF(word,id);
-							 prob*=(tf+1)/(D+V);
-							 
+							 prob*=(float) (tf+1)/(D+V);
+							 System.out.println("DF: "+D+" CF: "+V+" tf+ "+tf);
+							 System.out.println(prob);
 							 
 						 }
 				  }
+				  System.out.println("---------The total probabality is : "+prob);
 				  unsort.put(name,prob);
 			  }
 					 }
+		 System.out.println("---------The unsort result is : "+unsort);
 		 return unsort;
 	}
 

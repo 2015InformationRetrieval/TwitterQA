@@ -80,7 +80,9 @@ public class Answer {
 		while((temp=token.nextWord())!=null){
 			System.out.println("-----");
 			System.out.println(temp);
-			query.add(temp);
+			if(!temp.isEmpty()){
+				query.add(temp);
+			}	
 		}
 		//find user by question
 		int i=0;
@@ -122,7 +124,9 @@ public class Answer {
 		while((temp=token.nextWord())!=null){
 			System.out.println("-----");
 			System.out.println(temp);
-			query.add(temp);
+			if(!temp.isEmpty()){
+				query.add(temp);
+			}
 		}
 		//find user by question
 		int i=0;
@@ -133,22 +137,31 @@ public class Answer {
 			i++;
 		}
 		
+		System.out.println("---------Answerer: "+answerer);
 		unsort = userHelper.findAnswerProb(answerer,query,Uid);
-		sorted.putAll(unsort);
 		
-		System.out.println("This is the results: "+sorted);
-		Iterator itera = sorted.entrySet().iterator();
-		while(itera.hasNext()){
-			Map.Entry pair = (Map.Entry) itera.next();
-			String name = (String) pair.getKey();
-			nickname+=name;
-			nickname+=",";	
-		}
-			
+		if(unsort.size()<=1){
+			Iterator itera = unsort.entrySet().iterator();
+			while(itera.hasNext()){
+				Map.Entry pair = (Map.Entry) itera.next();
+				String name = (String) pair.getKey();
+				nickname+=name;	
+			}
+		}else{
+			sorted.putAll(unsort);
+			System.out.println("This is the more than one sorted results: ----------"+sorted);
+			Iterator itera = sorted.entrySet().iterator();
+			while(itera.hasNext()){
+				Map.Entry pair = (Map.Entry) itera.next();
+				String name = (String) pair.getKey();
+				nickname+=name;
+				nickname+=",";	
+			}
+		}	
 		if(nickname.length() != 0){
 			nickname = nickname.substring(0, nickname.length()-1);
 		}
-		//System.out.println("nicke name :" + nickname);
+		System.out.println("nick name :" + nickname);
 	
 		return nickname;
 	}
