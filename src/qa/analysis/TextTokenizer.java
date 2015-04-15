@@ -1,5 +1,6 @@
 package qa.analysis;
 
+import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.List;
 import java.util.LinkedList;
@@ -13,7 +14,7 @@ public class TextTokenizer {
 	
 	//declare a LinkedList to store each token of char[] array data type
 	//because LinkedList use pointer, when add each token to LinkedList, it is a little faster than ArrayList
- 	List<char[]> str = new LinkedList<char[]>();
+ 	List<char[]> str = new ArrayList<char[]>();
  	
  	// declare the iterator
 	Iterator<char[]> itea;
@@ -40,8 +41,12 @@ public class TextTokenizer {
 			
 			 //Returns the next token from this string tokenizer
 			 token = st.nextToken();
-			 //add each tokens into LinkedList
-			 str.add(token.toCharArray());
+			 if(!StopwordsRemover.isStopword(token)){
+				 //add each tokens into LinkedList
+				 str.add(token.toCharArray());
+			 }
+				 
+			
 			 
 		}
 		
