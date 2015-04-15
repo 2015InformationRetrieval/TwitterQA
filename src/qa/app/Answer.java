@@ -20,6 +20,7 @@ import org.omg.CORBA.PUBLIC_MEMBER;
 import qa.analysis.TextTokenizer;
 import qa.connection.Parameter;
 import qa.datahelper.UserHelper;
+import qa.util.QuestionUtil;
 import twitter4j.Status;
 import twitter4j.StatusUpdate;
 import twitter4j.Twitter;
@@ -47,7 +48,7 @@ public class Answer {
 	}
 	public static void reply(Status status){ 
 		 init();
-		 String question = status.getText().toLowerCase();
+		 String question = QuestionUtil.removeUserName(status.getText()).toLowerCase();
 		 System.out.println("Starting to find answerers: " + question);
 		 String answer = getAnswererProb(question ,status.getUser().getId());
 		 StatusUpdate statusUpdate = null;

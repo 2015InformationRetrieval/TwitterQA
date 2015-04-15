@@ -226,15 +226,15 @@ public  class UserHelper { // UserHelper
 			String query = "MATCH (a:User) -[type:Indexed]-> (b:Index) where a.ID=" + id + " and b.token='" + token + "' return type" ;
 			result = engine.execute(query);
 			tx.success();
+			if (result == null ) {
+				return false;
+			} else {
+				return true;
+			}
 
 		} // end try
 		
-		if (result == null ) {
-			return false;
-		} else {
-			return true;
-		}
-
+		
 	} // end checkRelationShipToken
 	
 	/**
@@ -254,14 +254,15 @@ public  class UserHelper { // UserHelper
 			result = engine.execute(query);
 			tx.success();
 
+			if (result == null ) {
+				return false;
+			} else {
+				return true;
+			}
+
+
 		} // end try 
 		
-		if (result == null ) {
-			return false;
-		} else {
-			return true;
-		}
-
 	} // end checkRelationShipUser
 	
 	/**
