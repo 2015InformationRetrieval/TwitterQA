@@ -68,7 +68,7 @@ public class Answer {
 		}	
 	}
 	
-	public static String getAnswererBL(String question, long Uid){
+	public static Map<Long, String> getAnswererBL(String question, long Uid){
 		//return users' nickname
 		System.out.println("QUESTION :"+question);
 		System.out.println("UID :"+Uid);
@@ -107,7 +107,7 @@ public class Answer {
 		}
 		System.out.println("nicke name :" + nickname);
 	
-		return nickname;
+		return answerer;
 	}
 	
 	public static String getAnswererProb(String question, long Uid){
@@ -146,8 +146,9 @@ public class Answer {
 			Iterator itera = unsort.entrySet().iterator();
 			while(itera.hasNext()){
 				Map.Entry pair = (Map.Entry) itera.next();
-				String name = (String) pair.getValue();
+				String name = (String) pair.getKey();
 				nickname = "@" + name;	
+				System.out.println("Just one result :" + nickname);
 			}
 		}else{
 			sorted.putAll(unsort);
@@ -155,14 +156,15 @@ public class Answer {
 			Iterator itera = sorted.entrySet().iterator();
 			while(itera.hasNext()){
 				Map.Entry pair = (Map.Entry) itera.next();
-				String name = (String) pair.getValue();
+				String name = (String) pair.getKey();
 				nickname+= "@" + name + ",";
 				
 			}
+			if(nickname.length() != 0){
+				nickname = nickname.substring(0, nickname.length()-1);
+			}
 		}	
-		if(nickname.length() != 0){
-			nickname = nickname.substring(0, nickname.length()-1);
-		}
+		
 		System.out.println("nick name :" + nickname);
 	
 		return nickname;
