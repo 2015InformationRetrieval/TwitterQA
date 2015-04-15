@@ -94,36 +94,37 @@ public  class UserHelper {
 		 
 		 Set<String> container = new HashSet<String>();
 		 
-		 if ( isExistByUserId (id)) {
-			try ( Transaction rx = db.beginTx() ) {
-				 ResourceIterator<Node> iterator_user = db.findNodesByLabelAndProperty(User, "ID", id).iterator();
-				 Node user_node = iterator_user.next();
-				 Relationship relation_indexed = user_node.getSingleRelationship(RelTypes.Indexed, Direction.OUTGOING);
-				 Relationship relation_followed = user_node.getSingleRelationship(RelTypes.Followed, Direction.INCOMING);
-				 rx.success();
-				 if (relation_indexed != null && relation_followed != null) {
-					 return true;
-				 }
-			 }
-		 } else {
-			 System.out.println("userID: " + id + " is not in neo4j. Thus no exsiting network");
-		 }
-//		 //Set<RelationshipType> contain = new HashSet<RelationshipType>();
-//		 try ( Transaction tx = db.beginTx()) {
-//			 if ( isExistByUserId(id) ) {
-//				 //Iterator<RelationshipType> itea_type = db.getRelationshipTypes();
-//				 Iterable<RelationshipType> itea_type = db.getRelationshipTypes();
-//				 Iterator<RelationshipType> itea = itea_type.iterator();
-//				 while( itea.hasNext()) {
-//					 String name = itea.next().name();
-//					 container.add(name);
+//		 if ( isExistByUserId (id)) {
+//			try ( Transaction rx = db.beginTx() ) {
+//				 ResourceIterator<Node> iterator_user = db.findNodesByLabelAndProperty(User, "ID", id).iterator();
+//				 Node user_node = iterator_user.next();
+//				 Relationship relation_indexed = user_node.getSingleRelationship(RelTypes.Indexed, Direction.OUTGOING);
+//				 Relationship relation_followed = user_node.getSingleRelationship(RelTypes.Followed, Direction.INCOMING);
+//				 rx.success();
+//				 if (relation_indexed != null && relation_followed != null) {
+//					 return true;
 //				 }
 //			 }
-//		 } // end try
-//		 
-//		 if ( container.contains("Indexed") && container.contains("Followed") ) {
-//			 return true;
+//		 } else {
+//			 System.out.println("userID: " + id + " is not in neo4j. Thus no exsiting network");
 //		 }
+		 
+		 //Set<RelationshipType> contain = new HashSet<RelationshipType>();
+		 try ( Transaction tx = db.beginTx()) {
+			 if ( isExistByUserId(id) ) {
+				 //Iterator<RelationshipType> itea_type = db.getRelationshipTypes();
+				 Iterable<RelationshipType> itea_type = db.getRelationshipTypes();
+				 Iterator<RelationshipType> itea = itea_type.iterator();
+				 while( itea.hasNext()) {
+					 String name = itea.next().name();
+					 container.add(name);
+				 }
+			 }
+		 } // end try
+		 
+		 if ( container.contains("Indexed") && container.contains("Followed") ) {
+			 return true;
+		 }
 
 		 return false;
 	 }
