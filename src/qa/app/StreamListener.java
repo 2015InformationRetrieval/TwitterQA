@@ -60,6 +60,7 @@ public class StreamListener implements StatusListener{
 				System.out.println("Need to create user"+  status.getUser().getName());
 				userHelper.addUser(status.getUser().getId(), status.getUser().getName());
 				userService.createIndex(status.getUser());
+				System.out.println("SEEEEEEEEEEEEEEEEEEEE---------");
 				Answer.reply(status);
 			}
 			

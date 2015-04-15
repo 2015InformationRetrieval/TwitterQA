@@ -48,6 +48,7 @@ public class Answer {
 	public static void reply(Status status){ 
 		 init();
 		 String question = status.getText().toLowerCase().replaceAll(Parameter.USER_NAME, "");
+		 System.out.println("Starting to find answerers:!!!!!!!!!-----");
 		 String answer = getAnswererBL(question ,status.getUser().getId());
 		 StatusUpdate statusUpdate = null;
 		 if(answer.length() == 0){
@@ -92,10 +93,11 @@ public class Answer {
 			answerer.putAll(userHelper.findAnswerBL(index,Uid));
 			i++;
 		}
+		System.out.println("%%%%%%%%%%%% :" + answerer);
 		Iterator it = answerer.entrySet().iterator();
 		while(it.hasNext()){
 			Map.Entry pair = (Map.Entry) it.next();
-			String tmp = (String) pair.getKey();
+			String tmp = (String) pair.getValue();
 			nickname+=tmp;
 			nickname+=",";
 		}
@@ -103,7 +105,7 @@ public class Answer {
 		if(nickname.length() != 0){
 			nickname = nickname.substring(0, nickname.length()-1);
 		}
-		//System.out.println("nicke name :" + nickname);
+		System.out.println("nicke name :" + nickname);
 	
 		return nickname;
 	}
@@ -144,7 +146,7 @@ public class Answer {
 			Iterator itera = unsort.entrySet().iterator();
 			while(itera.hasNext()){
 				Map.Entry pair = (Map.Entry) itera.next();
-				String name = (String) pair.getKey();
+				String name = (String) pair.getValue();
 				nickname = "@" + name;	
 			}
 		}else{
@@ -153,7 +155,7 @@ public class Answer {
 			Iterator itera = sorted.entrySet().iterator();
 			while(itera.hasNext()){
 				Map.Entry pair = (Map.Entry) itera.next();
-				String name = (String) pair.getKey();
+				String name = (String) pair.getValue();
 				nickname+= "@" + name + ",";
 				
 			}
