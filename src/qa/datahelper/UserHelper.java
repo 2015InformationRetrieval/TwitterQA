@@ -553,6 +553,7 @@ public  class UserHelper {
 							 
 						 }
 				  }
+				  prob = (float) Math.log(prob);
 				  System.out.println("---------The total probabality is : "+prob);
 				  unsort.put(name,prob);
 			  }
