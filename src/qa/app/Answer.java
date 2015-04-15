@@ -48,7 +48,7 @@ public class Answer {
 	public static void reply(Status status){ 
 		 init();
 		 String question = status.getText().toLowerCase().replaceAll(Parameter.USER_NAME, "");
-		 String answer = getAnswererProb(question ,status.getUser().getId());
+		 String answer = getAnswererBL(question ,status.getUser().getId());
 		 StatusUpdate statusUpdate = null;
 		 if(answer.length() == 0){
 			 statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName() + " For your question: " + question +  " No one can answer your question in your friend circle..");
