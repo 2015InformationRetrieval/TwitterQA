@@ -22,7 +22,7 @@ public class TextTokenizer {
 	String words = null;	
 	
 	// punctuation is the token delimiter
-    String punctuation = "*{}=[]()':_-?!/<>;., \\";
+    String punctuation = "*{}=[]()':_-?!/<>;., \\@";
 	
 	// YOU MUST IMPLEMENT THIS METHOD
 	public TextTokenizer( String s ) {
