@@ -41,7 +41,7 @@ public class TextTokenizer {
 			
 			 //Returns the next token from this string tokenizer
 			 token = st.nextToken();
-			 if(!StopwordsRemover.isStopword(token)){
+			 if(!StopwordsRemover.isStopword(token) && token.length() > 1){
 				 //add each tokens into LinkedList
 				 str.add(token.toCharArray());
 			 }
@@ -69,7 +69,7 @@ public class TextTokenizer {
 		return null;
 	}
 	public static void main(String args[]){
-		TextTokenizer t = new TextTokenizer("! What's pitts chis, sio?");
+		TextTokenizer t = new TextTokenizer("  What's pitts chis, sio?");
 		System.out.println(t);
 		String a;
 		while((a = t.nextWord()) != null){
