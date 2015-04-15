@@ -48,7 +48,7 @@ public class UserService {
 		// TODO Auto-generated method stub
 		
 		try {
-			
+			System.out.println("-----creatIndex Begin------");
 			// construct the follower index
 			userHelper.addUser(user.getId(), user.getName());
 			IDs followerIter = null;
@@ -77,7 +77,7 @@ public class UserService {
 					parseUser(id);
 				}
 			}*/
-			
+			System.out.println("-----creatIndex Stop------");
 		} catch (TwitterException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -85,7 +85,7 @@ public class UserService {
 	}
 	
 	public void parseUser(long id){
-		
+		System.out.println("------------Parse" + id + " start--------------");
 		try {
 			
 			ResponseList<Status> statusList= twitter.getUserTimeline(id);
@@ -99,8 +99,8 @@ public class UserService {
 					userHelper.addIndex(token, id);
 				}
 			}
-			//System.out.println("------------End--------------");
-		} catch (TwitterException e) {
+			System.out.println("------------Parse" + id + " End--------------");
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

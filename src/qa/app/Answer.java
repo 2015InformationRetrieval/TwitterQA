@@ -47,9 +47,9 @@ public class Answer {
 	}
 	public static void reply(Status status){ 
 		 init();
-		 String question = status.getText().toLowerCase().replaceAll(Parameter.USER_NAME, "");
-		 System.out.println("Starting to find answerers:!!!!!!!!!-----");
-		 String answer = getAnswererBL(question ,status.getUser().getId());
+		 String question = status.getText().toLowerCase();
+		 System.out.println("Starting to find answerers: " + question);
+		 String answer = getAnswererProb(question ,status.getUser().getId());
 		 StatusUpdate statusUpdate = null;
 		 if(answer.length() == 0){
 			 statusUpdate = new StatusUpdate("@" + status.getUser().getScreenName() + " For your question: " + question +  " No one can answer your question in your friend circle..");

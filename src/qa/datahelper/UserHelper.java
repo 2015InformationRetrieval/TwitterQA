@@ -302,7 +302,7 @@ public  class UserHelper { // UserHelper
 	 * @param userID
 	 */
 	public int updateCF(long userID) {
-		
+		System.out.println("------update CF Begin ------");
 		int userID_CF = 0;
 		
 		if ( isExistByUserId(userID) ) {
@@ -332,6 +332,8 @@ public  class UserHelper { // UserHelper
 		}
 		
 		System.out.println("the collection frequency of this userID: " + userID + " is " + userID_CF);
+		
+		System.out.println("------update CF End ------");
 		return userID_CF;
 		
 	} // end updateCF
