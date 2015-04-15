@@ -350,9 +350,10 @@ public  class UserHelper { // UserHelper
 			
 			if (isExistByIndex(token)) { // token is already in neo4j
 				 System.out.println("token: " + token + " is already in database" );
-				 try( Transaction tx =  db.beginTx() ) { // create relationship betwen token and id
-
-					 if ( checkRelationShipToken(token, id) ) { // there exist relationship between token and id
+				 
+				 if ( checkRelationShipToken(token, id) ) { // there is already relationship between token and id
+					 
+					 try ( Transaction tx = db.beginTx() ) {
 						 
 						 ResourceIterator<Node> iterator_user = db.findNodesByLabelAndProperty(User, "ID", id).iterator();
 						 //ResourceIterator<Node> iterator_index= db.findNodesByLabelAndProperty(Index, "token", token).iterator();
@@ -372,8 +373,12 @@ public  class UserHelper { // UserHelper
 						 }
 						 System.out.println("the new DF of ID: " + id + " is " + getTF(token, id));
 						 tx.success();
-
-					 } else { // need to create some relationship between id and token
+						 
+					 }
+					 
+				 } else { // there is no relationship between token and id
+					 
+					 try( Transaction tx =  db.beginTx() ) {
 						 ResourceIterator<Node> iterator_user = db.findNodesByLabelAndProperty(User, "ID", id).iterator();
 						 ResourceIterator<Node> iterator_index= db.findNodesByLabelAndProperty(Index, "token", token).iterator();
 						 
@@ -389,8 +394,9 @@ public  class UserHelper { // UserHelper
 						 System.out.println("index: " + token + " is already in neo4j. Add Relationship Indexed to " + id);
 						 tx.success();
 					 }
-
+						 
 				 }
+				 
 
 			} else { // create a node with property token: token
 				
