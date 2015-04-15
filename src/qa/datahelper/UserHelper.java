@@ -1,5 +1,5 @@
 package qa.datahelper;
- 
+// package
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -39,7 +39,7 @@ import org.neo4j.graphdb.Label;
 
 import static org.neo4j.kernel.impl.util.FileUtils.deleteRecursively;
 
-public  class UserHelper {
+public  class UserHelper { // UserHelper
 	
 	// there are two labels in this Neo4j. 
 	// (1) User(Property:id)  (2) Index (Property: token)
@@ -108,19 +108,37 @@ public  class UserHelper {
 //		 } else {
 //			 System.out.println("userID: " + id + " is not in neo4j. Thus no exsiting network");
 //		 }
+		 if ( isExistByUserId(id)) {
+			 
+			 try ( Transaction tx = db.beginTx()) {
+
+					 Iterable<RelationshipType> itea_type = db.getRelationshipTypes();
+					 Iterator<RelationshipType> itea = itea_type.iterator();
+					 while( itea.hasNext()) {
+						 String name = itea.next().name();
+						 container.add(name);
+					 }
+					 tx.success();
+			 } // end try 
+			 
+		 } else {
+			 System.out.println("user id: " + id + " is not in neo4j");
+		 }
 		 
-		 //Set<RelationshipType> contain = new HashSet<RelationshipType>();
-		 try ( Transaction tx = db.beginTx()) {
-			 if ( isExistByUserId(id) ) {
-				 //Iterator<RelationshipType> itea_type = db.getRelationshipTypes();
-				 Iterable<RelationshipType> itea_type = db.getRelationshipTypes();
-				 Iterator<RelationshipType> itea = itea_type.iterator();
-				 while( itea.hasNext()) {
-					 String name = itea.next().name();
-					 container.add(name);
-				 }
-			 }
-		 } // end try
+//		 //Set<RelationshipType> contain = new HashSet<RelationshipType>();
+//		 try ( Transaction tx = db.beginTx()) {
+//			 if ( isExistByUserId(id) ) {
+//				 //Iterator<RelationshipType> itea_type = db.getRelationshipTypes();
+//				 Iterable<RelationshipType> itea_type = db.getRelationshipTypes();
+//				 Iterator<RelationshipType> itea = itea_type.iterator();
+//				 while( itea.hasNext()) {
+//					 String name = itea.next().name();
+//					 container.add(name);
+//				 }
+//			 } else {
+//	
+//			 }
+//		 } // end try
 		 
 		 if ( container.contains("Indexed") && container.contains("Followed") ) {
 			 return true;
@@ -208,13 +226,14 @@ public  class UserHelper {
 			String query = "MATCH (a:User) -[type:Indexed]-> (b:Index) where a.ID=" + id + " and b.token='" + token + "' return type" ;
 			result = engine.execute(query);
 			tx.success();
-			
-			if (result == null ) {
-				return false;
-			} else {
-				return true;
-			}
+
 		} // end try
+		
+		if (result == null ) {
+			return false;
+		} else {
+			return true;
+		}
 
 	} // end checkRelationShipToken
 	
@@ -234,13 +253,14 @@ public  class UserHelper {
 			String query = "MATCH (user:User) <-[type:Followed]- (follower:User) where user.ID=" + user + " and follower.ID=" + follower + " return type" ;
 			result = engine.execute(query);
 			tx.success();
-			
-			if (result == null ) {
-				return false;
-			} else {
-				return true;
-			}
+
 		} // end try 
+		
+		if (result == null ) {
+			return false;
+		} else {
+			return true;
+		}
 
 	} // end checkRelationShipUser
 	
@@ -557,7 +577,11 @@ public  class UserHelper {
 				  System.out.println("---------The total probabality is : "+prob);
 				  unsort.put(name,prob);
 			  }
-					 }
+			  
+			  System.out.println("findAnswerProb is done");
+			  transction.success();
+			  
+		}
 		 System.out.println("---------The unsort result is : "+unsort);
 		 return unsort;
 	}
@@ -586,7 +610,7 @@ public  class UserHelper {
 		return users;
 	}
 	
-	 // end addFollowing
+	 // end addFollowing...
 	
 	/**
 	 * shut down the database
