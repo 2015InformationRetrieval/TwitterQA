@@ -140,12 +140,12 @@ public class Answer {
 		System.out.println("---------Answerer: "+answerer);
 		unsort = userHelper.findAnswerProb(answerer,query,Uid);
 		
-		if(unsort.size()<=1){
+		if(unsort.size()<=1){	//only one answerer
 			Iterator itera = unsort.entrySet().iterator();
 			while(itera.hasNext()){
 				Map.Entry pair = (Map.Entry) itera.next();
 				String name = (String) pair.getKey();
-				nickname+=name;	
+				nickname = "@" + name;	
 			}
 		}else{
 			sorted.putAll(unsort);
@@ -154,8 +154,8 @@ public class Answer {
 			while(itera.hasNext()){
 				Map.Entry pair = (Map.Entry) itera.next();
 				String name = (String) pair.getKey();
-				nickname+=name;
-				nickname+=",";	
+				nickname+= "@" + name + ",";
+				
 			}
 		}	
 		if(nickname.length() != 0){

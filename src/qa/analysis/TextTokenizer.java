@@ -27,10 +27,13 @@ public class TextTokenizer {
 		for(int i = 0;i < texts.length;i++){
 			
 			//int len=texts[i].length();
-			while(texts[i].length()>1 && !Character.isLetter(texts[i].charAt(texts[i].length()-1))){
+			while(texts[i].length()>0 
+					&& !Character.isLetter(texts[i].charAt(texts[i].length()-1))){
+				
 				texts[i]=texts[i].substring(0, texts[i].length()-1);
-				}	
+			}	
 		    String tmp = texts[i].toLowerCase();
+		    
 			if(!StopwordsRemover.isStopword(tmp)){
 			    	 list.add(tmp);	    
 			    }
@@ -57,7 +60,7 @@ public class TextTokenizer {
 	}
 	
 	public static void main(String args[]){
-		TextTokenizer t = new TextTokenizer("  pitts chis, sio");
+		TextTokenizer t = new TextTokenizer("  pitts chis, sio ?");
 		System.out.println(t);
 		String a;
 		while((a = t.nextWord()) != null){
