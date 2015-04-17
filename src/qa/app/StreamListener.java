@@ -52,7 +52,6 @@ public class StreamListener implements StatusListener{
 		System.out.println(status.getUser().getName()+"  "+status.getUser().getId());
 		
 		if(status.getUser().getId() != Long.parseLong(Parameter.USER_ID )){
-			System.out.println("--------TESTING-------");
 			if(userService.IsExistUserNetwork(status.getUser())){
 				System.out.println(status.getUser().getName()+" is in database");
 				Answer.reply(status);
@@ -60,7 +59,6 @@ public class StreamListener implements StatusListener{
 				System.out.println("Need to create user"+  status.getUser().getName());
 				userHelper.addUser(status.getUser().getId(), status.getUser().getName());
 				userService.createIndex(status.getUser());
-				System.out.println("SEEEEEEEEEEEEEEEEEEEE---------");
 				Answer.reply(status);
 			}
 			

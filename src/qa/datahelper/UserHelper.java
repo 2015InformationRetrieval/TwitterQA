@@ -646,28 +646,18 @@ public  class UserHelper { // UserHelper
 	  */
 	public Map<Long, String> findAnswerBL(String index,Long Uid){
 		
-		 //Set<String> users = new HashSet<>();
 		 Map<Long, String> users =new HashMap<>();
 		 ExecutionEngine engine = new ExecutionEngine(db);
 		 ExecutionResult result;
 		 
 		 try(Transaction transction=db.beginTx()){
-			  
-			// result=engine.execute("MATCH (a)-[:`Followed`]->(b)-[:`Indexed`]-(c) where c.token='"+index+"' and b.ID="+Uid+" RETURN a");
-			 result = engine.execute("MATCH (b)<-[:`Followed`]-(a)-[:`Indexed`]-(c) where c.token='"+index+"' and b.ID="+Uid+" RETURN a");
-			//result=engine.execute("MATCH (b:`User`) where b.ID="+Uid+" RETURN b");
-			 //System.out.println("Check Uid: "+Uid);
-			 System.out.println("Check index: "+index);
-			 //result=engine.execute("MATCH (a)-[:`Followed`]-(b) where a.ID="+Uid+" RETURN b");
-			 //result=engine.execute("MATCH (a)-[:`Indexed`]-(b:`User`) where a.token='"+index+"' RETURN b");
-			 //result=engine.execute("MATCH (a)-[:`Indexed`]-(b:`User`) where a.token='pittsburgh' RETURN b");
+			 result = engine.execute("MATCH (b)<-[:`Followed`]-(a)-[:`Indexed`]-(c) where c.token='"+index+"' and b.ID="+Uid+" RETURN a");	
 			 for(Map<String,Object> map : result){
 				 Node temp=(Node) map.get("a");
 				 String name=(String) temp.getProperty("name");
 				 Long id=(Long)temp.getProperty("ID");
 				 users.put(id, name);
 			 } 
-			 System.out.println("This is the partial results: "+users);
 			 transction.success();
 		 }
 		 return users;
@@ -687,31 +677,21 @@ public  class UserHelper { // UserHelper
 				  String name = (String) pair.getValue();
 				  Long id = (Long) pair.getKey();
 				  float prob = (float) 1.0;
-				  System.out.println("------Answerers' Name---:"+name);
 				  result = engine.execute("MATCH (a) where a.ID="+id+" RETURN a");
 				  for(Map<String,Object> map : result){
-					     System.out.println("-----------Prob Result:-----"+map);
 						 Node ans=(Node) map.get("a");
 						 int D=(int) ans.getProperty("DF");
 						 int V=(int) ans.getProperty("CF");
 						 for(String word:query){
 							 int tf=getTF(word,id);
 							 prob*=(float) (tf+1)/(D+V);
-							 System.out.println("DF: "+D+" CF: "+V+" tf+ "+tf);
-							 System.out.println(prob);
-							 
 						 }
 				  }
 				  prob = (float) Math.log(prob);
-				  System.out.println("---------The total probabality is : "+prob);
 				  unsort.put(name,prob);
 			  }
-			  
-			  System.out.println("findAnswerProb is done");
-			  transction.success();
-			  
+			  transction.success();  
 		}
-		 System.out.println("---------The unsort result is : "+unsort);
 		 return unsort;
 	}
 

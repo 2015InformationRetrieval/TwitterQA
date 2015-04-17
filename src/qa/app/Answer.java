@@ -32,8 +32,7 @@ import twitter4j.conf.ConfigurationBuilder;
 public class Answer {
 	private static Twitter twitter = null;
 	private static UserHelper userHelper = new UserHelper();
-	 //private static final String DB_PATH = "neo4j-community-2.2.0/test";
-	 //static GraphDatabaseService db = new GraphDatabaseFactory().newEmbeddedDatabase( DB_PATH );
+	
 	
 	public static void init(){
 		if(twitter == null){
@@ -49,7 +48,6 @@ public class Answer {
 	public static void reply(Status status){ 
 		 init();
 		 String question = QuestionUtil.removeUserName(status.getText()).toLowerCase();
-		 System.out.println("Starting to find answerers: " + question);
 		 String answer = getAnswererProb(question ,status.getUser().getId());
 		 StatusUpdate statusUpdate = null;
 		 if(answer.length() == 0){
@@ -62,7 +60,6 @@ public class Answer {
 		 statusUpdate.setInReplyToStatusId(status.getId());
 		 try {
 			twitter.updateStatus(statusUpdate);
-			System.out.println("------DONE-----");
 		}catch (TwitterException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -70,9 +67,6 @@ public class Answer {
 	}
 	
 	public static Map<Long, String> getAnswererBL(String question, long Uid){
-		//return users' nickname
-		System.out.println("QUESTION :"+question);
-		System.out.println("UID :"+Uid);
 		TextTokenizer token=new TextTokenizer(question);
 		List<String> query=new ArrayList<String>();
 		String nickname = "";
@@ -80,8 +74,6 @@ public class Answer {
 		String temp;
 		
 		while((temp=token.nextWord())!=null){
-			System.out.println("-----");
-			System.out.println(temp);
 			if(!temp.isEmpty()){
 				query.add(temp);
 			}	
@@ -94,7 +86,6 @@ public class Answer {
 			answerer.putAll(userHelper.findAnswerBL(index,Uid));
 			i++;
 		}
-		System.out.println("%%%%%%%%%%%% :" + answerer);
 		Iterator it = answerer.entrySet().iterator();
 		while(it.hasNext()){
 			Map.Entry pair = (Map.Entry) it.next();
@@ -106,27 +97,20 @@ public class Answer {
 		if(nickname.length() != 0){
 			nickname = nickname.substring(0, nickname.length()-1);
 		}
-		System.out.println("nicke name :" + nickname);
 	
 		return answerer;
 	}
 	
 	public static String getAnswererProb(String question, long Uid){
 		//return users' nickname
-		System.out.println("QUESTION :"+question);
-		System.out.println("UID :"+Uid);
 		TextTokenizer token=new TextTokenizer(question);
 		List<String> query=new ArrayList<String>();
 		String nickname = "";
 		Map<Long, String> answerer = new HashMap<>();
 		Map<String, Float> unsort = new HashMap<>();
-		ValueComparator bvc =  new ValueComparator(unsort);
-		TreeMap<String, Float> sorted=new TreeMap<>(bvc);
-		//System.out.println(token);
+		
 		String temp;
 		while((temp=token.nextWord())!=null){
-			System.out.println("-----");
-			System.out.println(temp);
 			if(!temp.isEmpty()){
 				query.add(temp);
 			}
@@ -135,26 +119,18 @@ public class Answer {
 		int i=0;
 		while(i<query.size()){
 			String index=query.get(i);
-			System.out.println(index);
 			answerer.putAll(userHelper.findAnswerBL(index,Uid));
 			i++;
 		}
 		
-		System.out.println("---------Answerer: "+answerer);
 		unsort = userHelper.findAnswerProb(answerer,query,Uid);
-		
-		if(unsort.size()<=1){	//only one answerer
-			Iterator itera = unsort.entrySet().iterator();
-			while(itera.hasNext()){
-				Map.Entry pair = (Map.Entry) itera.next();
-				String name = (String) pair.getKey();
-				nickname = "@" + name;	
-				System.out.println("Just one result :" + nickname);
-			}
-		}else{
-			sorted.putAll(unsort);
-			System.out.println("This is the more than one sorted results: ----------"+sorted);
-			Iterator itera = sorted.entrySet().iterator();
+			
+			System.out.println("---------The unsort result is : "+unsort);
+			ValueComparator bvc =  new ValueComparator(unsort);
+			TreeMap<String, Float> sort=new TreeMap<>(bvc);
+			sort.putAll(unsort);
+			System.out.println("This is the sorted results: ----------"+sort);
+			Iterator itera = sort.entrySet().iterator();
 			while(itera.hasNext()){
 				Map.Entry pair = (Map.Entry) itera.next();
 				String name = (String) pair.getKey();
@@ -164,29 +140,10 @@ public class Answer {
 			if(nickname.length() != 0){
 				nickname = nickname.substring(0, nickname.length()-1);
 			}
-		}	
-		
-		System.out.println("nick name :" + nickname);
-	
 		return nickname;
 	}
 	
 }
 
-class ValueComparator implements Comparator<String> {
 
-    Map<String, Float> base;
-    public ValueComparator(Map<String, Float> base) {
-        this.base = base;
-    }
-
-    // Note: this comparator imposes orderings that are inconsistent with equals.    
-    public int compare(String a, String b) {
-        if (base.get(a) >= base.get(b)) {
-            return -1;
-        } else {
-            return 1;
-        } // returning 0 would merge keys
-    }
-}
 
