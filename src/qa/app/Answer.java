@@ -131,10 +131,12 @@ public class Answer {
 			sort.putAll(unsort);
 			System.out.println("This is the sorted results: ----------"+sort);
 			Iterator itera = sort.entrySet().iterator();
-			while(itera.hasNext()){
+			int count =0;
+			while(itera.hasNext() && count<3){
 				Map.Entry pair = (Map.Entry) itera.next();
 				String name = (String) pair.getKey();
 				nickname+= "@" + name + ",";
+				count++;
 				
 			}
 			if(nickname.length() != 0){
