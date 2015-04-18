@@ -57,7 +57,7 @@ public class StreamListener implements StatusListener{
 				Answer.reply(status);
 			}else{
 				System.out.println("Need to create user"+  status.getUser().getName());
-				userHelper.addUser(status.getUser().getId(), status.getUser().getName());
+				//userHelper.addUser(status.getUser().getId(), status.getUser().getName());
 				userService.createIndex(status.getUser());
 				Answer.reply(status);
 			}

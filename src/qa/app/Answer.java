@@ -136,12 +136,12 @@ public class Answer {
 				Map.Entry pair = (Map.Entry) itera.next();
 				String name = (String) pair.getKey();
 				nickname+= "@" + name + ",";
-				count++;
-				
+				count++;	
 			}
 			if(nickname.length() != 0){
 				nickname = nickname.substring(0, nickname.length()-1);
 			}
+			//System.out.println(nickname);
 		return nickname;
 	}
 	

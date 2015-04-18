@@ -50,7 +50,7 @@ public class UserService {
 		try {
 			System.out.println("-----creatIndex Begin------");
 			// construct the follower index
-			userHelper.addUser(user.getId(), user.getName());
+			userHelper.addUser(user.getId(), user.getScreenName());
 			IDs followerIter = null;
 			followerIter = twitter.getFollowersIDs(user.getId(), -1);
 			long[] followers = followerIter.getIDs();
